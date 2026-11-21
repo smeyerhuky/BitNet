@@ -1,0 +1,26 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef merge_intervals(intervals):\n    \"\"\"Merge overlapping or touching [start, end] intervals.\"\"\"\n    if not intervals:\n        return []\n\n    # Sort by start time to ensure linear processing\n    sorted_intervals = sorted(intervals, key=lambda x: x[0])\n    merged = []\n    \n    curr_start, curr_end = sorted_intervals[0]\n\n    for i in range(1, len(sorted_intervals)):\n        next_start, next_end = sorted_intervals[i]\n        # If intervals overlap or touch, merge them\n        if next_start <= curr_end:\n            curr_end = max(curr_end, next_end)\n        else:\n            # Return immutable pair form as per project decision\n            merged.append((curr_start, curr_end))\n            curr_start, curr_end = next_start, next_end\n\n    # Append the final interval as an immutable pair\n    merged.append((curr_start, curr_end))\n    return merged\n```",
+ "genome": {
+  "keep_last_k": 3,
+  "keep_first_k": 1,
+  "retrieval_k": 7,
+  "cos_threshold": 0.21,
+  "keep_set": [
+   34
+  ],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  24,
+  34,
+  36,
+  37,
+  38,
+  39
+ ]
+}
