@@ -70,7 +70,8 @@ def build_context():
     for path in sorted((ROOT / "corpus" / "conversations_v2").glob("*.json")):
         c = json.loads(path.read_text())
         convs[c["id"]] = {"system": c["system"], "notes": c["notes"], "history": c["history"],
-                          "request": c["request"], "files": c["files"]}
+                          "request": c["request"], "files": c["files"],
+                          "tools": [{"name": x["name"], "description": x.get("description", "")} for x in c.get("tools", [])]}
     CONTEXT_DOC.write_text(json.dumps({"conversations": convs}, separators=(",", ":")))
     return len(convs), CONTEXT_DOC.stat().st_size
 
