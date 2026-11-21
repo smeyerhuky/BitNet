@@ -105,3 +105,6 @@
 2026-11-21T08:10:46Z done v2-structural-running_mean-r1 beh=True dec=False prompt=183 [104/108] spent=366381
 2026-11-21T08:10:54Z done v2-structural-running_mean-r2 beh=True dec=False prompt=183 [105/108] spent=366649
 2026-11-21T08:11:04Z done v2-structural-slugify-r0 beh=False dec=False prompt=192 [106/108] spent=366928
+2026-11-21T08:11:08Z done v2-structural-slugify-r1 beh=False dec=False prompt=192 [107/108] spent=367207
+2026-11-21T08:11:10Z done v2-structural-slugify-r2 beh=False dec=False prompt=192 [108/108] spent=367486
+2026-11-21T08:11:10Z sweep complete

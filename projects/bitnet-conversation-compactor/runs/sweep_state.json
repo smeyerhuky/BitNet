@@ -105,12 +105,15 @@
   "v2-structural-running_mean-r0": "done",
   "v2-structural-running_mean-r1": "done",
   "v2-structural-running_mean-r2": "done",
-  "v2-structural-slugify-r0": "done"
+  "v2-structural-slugify-r0": "done",
+  "v2-structural-slugify-r1": "done",
+  "v2-structural-slugify-r2": "done"
  },
  "started": null,
  "conditions": [
   "retrieval",
   "keep_last_k",
   "structural"
- ]
+ ],
+ "finished": "2026-11-21T08:11:10Z"
 }
