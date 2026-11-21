@@ -67,7 +67,8 @@
   "v2-keep_last_k-roman_to_int-r1": "done",
   "v2-keep_last_k-roman_to_int-r2": "done",
   "v2-keep_last_k-running_mean-r0": "done",
-  "v2-keep_last_k-running_mean-r1": "done"
+  "v2-keep_last_k-running_mean-r1": "done",
+  "v2-keep_last_k-running_mean-r2": "done"
  },
  "started": null,
  "conditions": [
