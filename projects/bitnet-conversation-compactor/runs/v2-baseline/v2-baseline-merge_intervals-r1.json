@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef merge_intervals(intervals):\n    \"\"\"Merge overlapping or touching intervals. Returns tuples (start, end).\"\"\"\n    if not intervals:\n        return []\n\n    # Sort by start time to ensure we can merge in one pass\n    sorted_intervals = sorted(intervals, key=lambda x: x[0])\n    merged = []\n    \n    curr_start, curr_end = sorted_intervals[0]\n\n    for next_start, next_end in sorted_intervals[1:]:\n        # If intervals overlap or touch, merge them\n        if next_start <= curr_end:\n            curr_end = max(curr_end, next_end)\n        else:\n            # Append as tuple per project decision for downstream serializer\n            merged.append((curr_start, curr_end))\n            curr_start, curr_end = next_start, next_end\n\n    merged.append((curr_start, curr_end))\n    return merged\n```",
+  "usage": {
+    "prompt_tokens": 3245,
+    "completion_tokens": 222,
+    "total_tokens": 3467,
+    "prompt_tokens_details": {
+      "cached_tokens": 192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}
