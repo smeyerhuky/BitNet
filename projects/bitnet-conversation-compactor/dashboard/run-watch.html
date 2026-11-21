@@ -1,23 +1,28 @@
 <title>Compactor Run Watch</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Plan: a bench instrument log. Ink-and-paper neutrals with a warm amber accent for
-   the live signal, green and red only for pass and fail. Space Grotesk for figures and
-   headings, Inter for text. One row per run, newest first. */
+/* Plan: a bench log with a chat inspector. Neutral paper-and-ink surfaces, one validated
+   categorical color per condition (fixed order, color follows the condition), green and red
+   only for pass and fail. Figures in Space Grotesk, text in Inter. Every bar carries its value. */
 :root {
-  --bg: #f4f2ec; --panel: #ffffff; --fg: #1b1d22; --muted: #62666f; --line: #dcd8cd;
-  --accent: #b87410; --pass: #237a52; --fail: #b8432f; --tile: #efece4;
+  --bg: #f5f4f0; --panel: #ffffff; --fg: #0b0b0b; --muted: #52514e; --line: #dedcd4; --tile: #f0eee8;
+  --pass: #0c7a3a; --fail: #b8432f; --accent: #2a78d6;
+  --c-baseline: #2a78d6; --c-keep_last_k: #eb6834; --c-structural: #1baf7a; --c-v2-baseline: #eda100; --c-retrieval: #e87ba4;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #15171b; --panel: #1d2026; --fg: #eceae4; --muted: #9ba0aa; --line: #2e323b;
-    --accent: #e8a93a; --pass: #4cc38a; --fail: #ef7a63; --tile: #242830; color-scheme: dark;
+    --bg: #111110; --panel: #1a1a19; --fg: #f0efec; --muted: #c3c2b7; --line: #383835; --tile: #22221f;
+    --pass: #4cc38a; --fail: #ef7a63; --accent: #3987e5;
+    --c-baseline: #3987e5; --c-keep_last_k: #d95926; --c-structural: #199e70; --c-v2-baseline: #c98500; --c-retrieval: #d55181;
+    color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #15171b; --panel: #1d2026; --fg: #eceae4; --muted: #9ba0aa; --line: #2e323b;
-  --accent: #e8a93a; --pass: #4cc38a; --fail: #ef7a63; --tile: #242830; color-scheme: dark;
+  --bg: #111110; --panel: #1a1a19; --fg: #f0efec; --muted: #c3c2b7; --line: #383835; --tile: #22221f;
+  --pass: #4cc38a; --fail: #ef7a63; --accent: #3987e5;
+  --c-baseline: #3987e5; --c-keep_last_k: #d95926; --c-structural: #199e70; --c-v2-baseline: #c98500; --c-retrieval: #d55181;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 body {
@@ -29,44 +34,72 @@ body {
 }
 h1, h2, .fig { font-family: "Space Grotesk", Inter, system-ui, sans-serif; }
 h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
-h2 { font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 22px; }
+h2 { font-size: 13px; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 22px; }
 header { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: baseline; justify-content: space-between; }
 .live { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
 .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
-.dot.on { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
-.note { color: var(--muted); font-size: 13px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.dot.on { background: var(--accent); }
+.note { color: var(--muted); font-size: 13px; margin: 0; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .tile { background: var(--tile); border-radius: 10px; padding: 14px 16px; min-width: 0; }
 .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-.tile .fig { font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.tile .fig { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
 .scroll { overflow-x: auto; }
-.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.grid2 { display: grid; gap: 16px; grid-template-columns: 1fr; }
+@media (min-width: 760px) { .grid2 { grid-template-columns: 1fr 1fr; } }
+.row { display: grid; grid-template-columns: minmax(110px, 150px) 1fr 58px; gap: 10px; align-items: center; padding: 6px 0; min-width: 0; }
+.row .name { display: flex; align-items: center; gap: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+.track { height: 12px; background: var(--tile); border-radius: 3px; overflow: hidden; min-width: 0; }
+.track > span { display: block; height: 100%; border-radius: 3px; }
+.val { font-variant-numeric: tabular-nums; text-align: right; font-size: 13px; }
+.metric { font-size: 12px; color: var(--muted); margin: 14px 0 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+select { font: inherit; color: var(--fg); background: var(--tile); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-height: 36px; }
+.runs { list-style: none; margin: 0; padding: 0; }
+.runs li { border-bottom: 1px solid var(--line); }
+.runs button { all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 6px; border-radius: 6px; min-width: 0; }
+.runs button:hover, .runs button:focus-visible { background: var(--tile); }
+.runs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.runs .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.runs .meta { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
 .pill.pass { color: var(--pass); background: color-mix(in srgb, var(--pass) 14%, transparent); }
 .pill.fail { color: var(--fail); background: color-mix(in srgb, var(--fail) 14%, transparent); }
-.empty { padding: 28px 8px; text-align: center; color: var(--muted); }
+.empty { padding: 26px 8px; text-align: center; color: var(--muted); }
 .empty strong { color: var(--fg); display: block; margin-bottom: 6px; font-size: 15px; }
-.feed li { list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: center; min-width: 0; }
-.feed ul { margin: 0; padding: 0; }
-.feed .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.feed .meta { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bar { height: 8px; background: var(--tile); border-radius: 999px; overflow: hidden; }
-.bar > span { display: block; height: 100%; background: var(--accent); }
-.budget { display: grid; gap: 6px; }
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); padding: 0; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
+.dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.dlg-head .id { font-family: "Space Grotesk", Inter, sans-serif; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dlg-body { display: grid; gap: 16px; padding: 16px; overflow-y: auto; max-height: calc(100vh - 110px); grid-template-columns: 1fr; }
+@media (min-width: 760px) { .dlg-body { grid-template-columns: 1fr 240px; } }
+.thread { display: grid; gap: 10px; min-width: 0; }
+.msg { border-radius: 10px; padding: 10px 12px; min-width: 0; max-width: 100%; }
+.msg .who { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
+.msg pre { white-space: pre-wrap; word-break: break-word; margin: 0; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.msg.user { background: var(--tile); }
+.msg.assistant { border: 1px solid var(--line); }
+.msg.system { border: 1px dashed var(--line); color: var(--muted); }
+.msg .more { margin-top: 6px; font: inherit; font-size: 12px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.facts { display: grid; gap: 8px; align-content: start; }
+.facts div { display: flex; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; text-align: right; }
+.closebtn { font: inherit; color: var(--fg); background: var(--tile); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; min-height: 36px; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-@media (prefers-reduced-motion: no-preference) { .dot.on { animation: pulse 2.4s ease-out infinite; } }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
 </style>
 <div class="wrap">
   <header>
     <h1>Compactor run watch</h1>
     <div class="live"><span class="dot" id="dot"></span><span id="liveText">Connecting to the run store</span></div>
   </header>
-  <p class="note" id="connNote" hidden>Still waiting for the run store. It may be out of date until it answers.</p>
+  <p class="note" id="connNote" hidden>Still waiting for the run store. Figures may be out of date until it answers.</p>
 
   <section class="tiles" aria-label="Summary">
     <div class="tile"><div class="label">Runs</div><div class="fig" id="nRuns">–</div></div>
@@ -76,98 +109,239 @@ th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: upp
     <div class="tile"><div class="label">Cached share</div><div class="fig" id="cShare">–</div></div>
   </section>
 
-  <section class="panel">
-    <h2>Budget</h2>
-    <div class="budget">
-      <div class="bar" aria-hidden="true"><span id="budgetBar" style="width:0%"></span></div>
-      <div class="note" id="budgetText">Ledger not yet reported.</div>
+  <div class="grid2">
+    <section class="panel" aria-labelledby="analyticsH">
+      <h2 id="analyticsH">Analytics by condition</h2>
+      <div id="charts"><div class="empty"><strong>No runs yet</strong>Charts fill in as runs sync into the store.</div></div>
+    </section>
+    <section class="panel" aria-labelledby="budgetH">
+      <h2 id="budgetH">Budget</h2>
+      <div class="track" aria-hidden="true"><span id="budgetBar" style="width:0%; background: var(--accent)"></span></div>
+      <p class="note" id="budgetText" style="margin-top:8px">Ledger not yet reported.</p>
+      <h2 style="margin-top:18px">Table view</h2>
+      <div class="scroll" id="byCond"></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="runsH">
+    <h2 id="runsH">Runs</h2>
+    <div class="controls">
+      <label class="note" for="condFilter">Condition</label>
+      <select id="condFilter"><option value="">All conditions</option></select>
+      <label class="note" for="resFilter">Result</label>
+      <select id="resFilter"><option value="">All</option><option value="pass">Pass both</option><option value="fail">Fail either</option></select>
     </div>
-  </section>
-
-  <section class="panel">
-    <h2>By condition</h2>
-    <div class="scroll" id="byCond"><div class="empty"><strong>No runs yet</strong>Runs appear here as the sweep syncs them into the store.</div></div>
-  </section>
-
-  <section class="panel">
-    <h2>Latest runs</h2>
-    <div class="feed" id="feed"><div class="empty"><strong>No runs yet</strong>Each finished call is a row here, newest first.</div></div>
+    <ul class="runs" id="runs"><li class="empty"><strong>No runs yet</strong>Each finished call appears here, newest first. Open one to read the chat.</li></ul>
   </section>
 </div>
+
+<dialog id="inspector" aria-labelledby="dlgId">
+  <div class="dlg-head">
+    <div class="id" id="dlgId">Run</div>
+    <button class="closebtn" id="dlgClose" type="button">Close</button>
+  </div>
+  <div class="dlg-body">
+    <div class="thread" id="thread"></div>
+    <dl class="facts" id="facts"></dl>
+  </div>
+</dialog>
+
 <script>
 (function () {
+  var CONDS = ["baseline", "keep_last_k", "structural", "v2-baseline", "retrieval"];
+  var LABEL = { "baseline": "Baseline", "keep_last_k": "Keep last 2", "structural": "Structural", "v2-baseline": "Baseline (v2)", "retrieval": "Retrieval" };
+  var runs = [], context = null, contextLoading = false, db = null, gotData = false, timer = null;
   var dot = document.getElementById("dot"), liveText = document.getElementById("liveText"),
-      connNote = document.getElementById("connNote"), gotData = false, timer = null;
-  function pct(n, d) { return d ? Math.round(100 * n / d) + "%" : "–"; }
-  function el(tag, text, cls) { var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text == null ? "" : String(text); return e; }
+      connNote = document.getElementById("connNote"), dlg = document.getElementById("inspector");
 
-  function render(docs) {
-    var runs = docs.filter(Boolean);
-    document.getElementById("nRuns").textContent = runs.length;
+  function pct(n, d) { return d ? Math.round(100 * n / d) + "%" : "–"; }
+  function fmt(n) { return n == null ? "–" : Number(n).toLocaleString(); }
+  function el(tag, text, cls) { var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text == null ? "" : String(text); return e; }
+  function colorOf(c) { return "var(--c-" + (CONDS.indexOf(c) >= 0 ? c : "baseline") + ")"; }
+  function condLabel(c) { return LABEL[c] || c || "unlabelled"; }
+  function setLive(on, text) { dot.className = "dot" + (on ? " on" : ""); liveText.textContent = text; }
+
+  function groupStats() {
+    var g = {};
+    runs.forEach(function (r) {
+      var k = r.condition || "unlabelled";
+      var s = g[k] = g[k] || { n: 0, beh: 0, dec: 0, prompt: 0, cached: 0 };
+      s.n++; s.beh += r.behavior_pass ? 1 : 0; s.dec += r.constraint_pass ? 1 : 0;
+      s.prompt += r.input_tokens || 0; s.cached += r.cached_tokens || 0;
+    });
+    return g;
+  }
+
+  function renderSummary() {
     var n = runs.length, beh = runs.filter(function (r) { return r.behavior_pass; }).length,
         dec = runs.filter(function (r) { return r.constraint_pass; }).length,
         prompt = runs.reduce(function (s, r) { return s + (r.input_tokens || 0); }, 0),
         cached = runs.reduce(function (s, r) { return s + (r.cached_tokens || 0); }, 0);
+    document.getElementById("nRuns").textContent = n;
     document.getElementById("pBeh").textContent = pct(beh, n);
     document.getElementById("pDec").textContent = pct(dec, n);
-    document.getElementById("mPrompt").textContent = n ? Math.round(prompt / n).toLocaleString() : "–";
+    document.getElementById("mPrompt").textContent = n ? fmt(Math.round(prompt / n)) : "–";
     document.getElementById("cShare").textContent = pct(cached, prompt);
-
-    var groups = {};
-    runs.forEach(function (r) { var k = r.condition || "unlabelled"; (groups[k] = groups[k] || []).push(r); });
-    var box = document.getElementById("byCond");
-    if (!n) { return; }
-    box.textContent = "";
-    var table = document.createElement("table"), head = document.createElement("tr");
-    ["Condition", "Runs", "Behavior", "Decision", "Mean prompt"].forEach(function (h) { head.appendChild(el("th", h)); });
-    table.appendChild(head);
-    Object.keys(groups).sort().forEach(function (k) {
-      var g = groups[k], gb = g.filter(function (r) { return r.behavior_pass; }).length,
-          gd = g.filter(function (r) { return r.constraint_pass; }).length,
-          gp = Math.round(g.reduce(function (s, r) { return s + (r.input_tokens || 0); }, 0) / g.length);
-      var tr = document.createElement("tr");
-      tr.appendChild(el("td", k)); tr.appendChild(el("td", g.length));
-      tr.appendChild(el("td", pct(gb, g.length))); tr.appendChild(el("td", pct(gd, g.length)));
-      tr.appendChild(el("td", gp.toLocaleString()));
-      table.appendChild(tr);
-    });
-    box.appendChild(table);
-
-    var feed = document.getElementById("feed");
-    feed.textContent = "";
-    var list = document.createElement("ul");
-    runs.slice(0, 30).forEach(function (r) {
-      var li = document.createElement("li");
-      var ok = r.behavior_pass && r.constraint_pass;
-      li.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
-      li.appendChild(el("span", r.run_id || "", "id"));
-      li.appendChild(el("span", (r.input_tokens || 0) + " in · " + (r.cached_tokens || 0) + " cached", "meta"));
-      list.appendChild(li);
-    });
-    feed.appendChild(list);
   }
 
-  function setLive(on, text) { dot.className = "dot" + (on ? " on" : ""); liveText.textContent = text; }
+  function bar(container, name, cond, value, max, label) {
+    var row = el("div", null, "row");
+    var nm = el("div", null, "name");
+    var sw = el("span", null, "swatch"); sw.style.background = colorOf(cond);
+    nm.appendChild(sw); nm.appendChild(el("span", name));
+    var track = el("div", null, "track");
+    var fill = el("span"); fill.style.width = (max ? Math.max(0, Math.min(100, 100 * value / max)) : 0).toFixed(1) + "%";
+    fill.style.background = colorOf(cond); track.appendChild(fill);
+    row.appendChild(nm); row.appendChild(track); row.appendChild(el("div", label, "val"));
+    container.appendChild(row);
+  }
+
+  function renderCharts() {
+    var g = groupStats(), keys = CONDS.filter(function (c) { return g[c]; });
+    Object.keys(g).forEach(function (c) { if (keys.indexOf(c) < 0) keys.push(c); });
+    var box = document.getElementById("charts"), table = document.getElementById("byCond");
+    if (!keys.length) return;
+    box.textContent = ""; table.textContent = "";
+    var metrics = [
+      { title: "Behavior pass rate", fn: function (s) { return s.beh / s.n; }, lab: function (s) { return pct(s.beh, s.n); }, max: 1 },
+      { title: "Decision pass rate", fn: function (s) { return s.dec / s.n; }, lab: function (s) { return pct(s.dec, s.n); }, max: 1 },
+      { title: "Mean prompt tokens", fn: function (s) { return s.prompt / s.n; }, lab: function (s) { return fmt(Math.round(s.prompt / s.n)); }, max: null },
+      { title: "Cached share of prompt", fn: function (s) { return s.prompt ? s.cached / s.prompt : 0; }, lab: function (s) { return pct(s.cached, s.prompt); }, max: 1 }
+    ];
+    var maxPrompt = Math.max.apply(null, keys.map(function (k) { return g[k].prompt / g[k].n; }));
+    metrics.forEach(function (m) {
+      box.appendChild(el("div", m.title, "metric"));
+      keys.forEach(function (k) {
+        var s = g[k], mx = m.max == null ? maxPrompt : m.max;
+        bar(box, condLabel(k), k, m.fn(s), mx, m.lab(s));
+      });
+    });
+    var t = document.createElement("table"), head = document.createElement("tr");
+    ["Condition", "Runs", "Behavior", "Decision", "Mean prompt", "Cached"].forEach(function (h) { head.appendChild(el("th", h)); });
+    t.appendChild(head);
+    keys.forEach(function (k) {
+      var s = g[k], tr = document.createElement("tr");
+      [condLabel(k), s.n, pct(s.beh, s.n), pct(s.dec, s.n), fmt(Math.round(s.prompt / s.n)), pct(s.cached, s.prompt)]
+        .forEach(function (v) { tr.appendChild(el("td", v)); });
+      t.appendChild(tr);
+    });
+    table.appendChild(t);
+    var sel = document.getElementById("condFilter"), current = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    keys.forEach(function (k) { var o = el("option", condLabel(k)); o.value = k; sel.appendChild(o); });
+    sel.value = current;
+  }
+
+  function renderRuns() {
+    var cond = document.getElementById("condFilter").value, res = document.getElementById("resFilter").value;
+    var list = document.getElementById("runs");
+    list.textContent = "";
+    var shown = runs.filter(function (r) {
+      if (cond && r.condition !== cond) return false;
+      var ok = r.behavior_pass && r.constraint_pass;
+      if (res === "pass" && !ok) return false;
+      if (res === "fail" && ok) return false;
+      return true;
+    }).slice(0, 200);
+    if (!shown.length) { list.appendChild(el("li", runs.length ? "No runs match these filters." : "No runs yet.", "empty")); return; }
+    shown.forEach(function (r) {
+      var li = document.createElement("li"), btn = document.createElement("button");
+      btn.type = "button";
+      var ok = r.behavior_pass && r.constraint_pass;
+      btn.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
+      btn.appendChild(el("span", r.run_id, "id"));
+      btn.appendChild(el("span", fmt(r.input_tokens) + " in · " + fmt(r.cached_tokens || 0) + " cached", "meta"));
+      btn.addEventListener("click", function () { openRun(r); });
+      li.appendChild(btn); list.appendChild(li);
+    });
+  }
+
+  function renderAll() { renderSummary(); renderCharts(); renderRuns(); }
+
+  function msgBlock(role, label, text) {
+    var box = el("div", null, "msg " + role);
+    box.appendChild(el("div", label, "who"));
+    var pre = el("pre", null);
+    var full = text == null ? "" : String(text), limit = 600;
+    pre.textContent = full.length > limit ? full.slice(0, limit) + "…" : full;
+    box.appendChild(pre);
+    if (full.length > limit) {
+      var b = el("button", "Show all " + full.length.toLocaleString() + " characters", "more");
+      b.type = "button";
+      b.addEventListener("click", function () { pre.textContent = full; b.remove(); });
+      box.appendChild(b);
+    }
+    return box;
+  }
+
+  function openRun(r) {
+    var thread = document.getElementById("thread"), facts = document.getElementById("facts");
+    thread.textContent = ""; facts.textContent = "";
+    document.getElementById("dlgId").textContent = r.run_id;
+    var ctx = context && context[r.conversation];
+    if (ctx) {
+      var sys = document.createElement("details");
+      sys.appendChild(el("summary", "System, notes and tools"));
+      sys.appendChild(msgBlock("system", "system", ctx.system + "\n\nNotes:\n- " + (ctx.notes || []).join("\n- ")));
+      thread.appendChild(sys);
+      (ctx.history || []).forEach(function (m) { thread.appendChild(msgBlock(m.role === "assistant" ? "assistant" : "user", m.role, m.content)); });
+      thread.appendChild(msgBlock("user", "user · request", ctx.request + "\n\n" + Object.keys(ctx.files || {}).map(function (f) { return "File " + f + ":\n" + ctx.files[f]; }).join("\n")));
+    } else {
+      thread.appendChild(el("p", contextLoading ? "Loading the conversation…" : "Conversation context is not in the store yet.", "note"));
+      loadContext();
+    }
+    thread.appendChild(msgBlock("assistant", "assistant · reply", r.reply == null ? "(no reply stored)" : r.reply + (r.reply_truncated ? "\n[reply truncated for storage]" : "")));
+    var rows = [
+      ["Condition", condLabel(r.condition)], ["Conversation", r.conversation], ["Date", r.ts],
+      ["Behavior", r.behavior_pass ? "pass" : "fail"], ["Decision", r.constraint_pass ? "pass" : "fail"],
+      ["Input tokens", fmt(r.input_tokens)], ["Cached tokens", fmt(r.cached_tokens || 0)], ["Output tokens", fmt(r.output_tokens)],
+      ["Model", r.model]
+    ];
+    rows.forEach(function (kv) { var d = document.createElement("div"); d.appendChild(el("dt", kv[0])); var dd = el("dd", kv[1]); d.appendChild(dd); facts.appendChild(d); });
+    if (!dlg.open) dlg.showModal();
+    document.getElementById("dlgClose").focus();
+  }
+
+  function loadContext() {
+    if (contextLoading || !db) return;
+    contextLoading = true;
+    db.doc("context/v2").get().then(function (snap) {
+      context = snap.exists ? (snap.data().conversations || {}) : {};
+      contextLoading = false;
+      renderAll();
+    }, function (e) {
+      contextLoading = false;
+      context = {};
+      setLive(false, "Context unavailable: " + (e && e.code ? e.code : "unknown"));
+    });
+  }
+
+  document.getElementById("condFilter").addEventListener("change", renderRuns);
+  document.getElementById("resFilter").addEventListener("change", renderRuns);
+  document.getElementById("dlgClose").addEventListener("click", function () { dlg.close(); });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
 
   async function start() {
     var claude = window.claude;
-    var db = claude && claude.use ? await claude.use("db") : null;
+    db = claude && claude.use ? await claude.use("db") : null;
     if (!db) { setLive(false, "Live store unavailable in this view"); return; }
     timer = setTimeout(function () { if (!gotData) connNote.hidden = false; }, 10000);
     db.doc("feed/latest").onSnapshot(function (d) {
       if (!d.metadata.fromCache) { gotData = true; clearTimeout(timer); connNote.hidden = true; }
       if (!d.exists) { setLive(false, "Waiting for the first sync"); return; }
       var doc = d.data();
-      setLive(true, "Live · " + (doc.run_count || 0) + " runs");
-      render(doc.runs || []);
+      runs = doc.runs || [];
+      setLive(true, "Live · " + (doc.run_count || runs.length) + " runs");
       var cap = doc.cap_tokens || 0, spent = doc.spent_tokens || 0;
       document.getElementById("budgetBar").style.width = (cap ? Math.min(100, 100 * spent / cap) : 0).toFixed(2) + "%";
       document.getElementById("budgetText").textContent =
-        spent.toLocaleString() + " of " + cap.toLocaleString() + " tokens on the local ledger (not a provider quota)";
+        fmt(spent) + " of " + fmt(cap) + " tokens on the local ledger (not a provider quota)";
+      renderAll();
     }, function (e) {
       clearTimeout(timer);
       setLive(false, "Store error: " + (e && e.code ? e.code : "unknown"));
     });
+  }
   start();
 })();
 </script>
