@@ -90,7 +90,8 @@
   "v2-structural-is_palindrome-r0": "done",
   "v2-structural-is_palindrome-r1": "done",
   "v2-structural-is_palindrome-r2": "done",
-  "v2-structural-merge_intervals-r0": "done"
+  "v2-structural-merge_intervals-r0": "done",
+  "v2-structural-merge_intervals-r1": "done"
  },
  "started": null,
  "conditions": [
