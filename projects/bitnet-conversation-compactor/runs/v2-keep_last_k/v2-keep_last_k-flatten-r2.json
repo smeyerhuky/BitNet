@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef flatten(xs):\n    \"\"\"Flatten arbitrarily nested lists into one flat list.\"\"\"\n    result = []\n    for item in xs:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+  "usage": {
+    "prompt_tokens": 302,
+    "completion_tokens": 75,
+    "total_tokens": 377,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef reverse_words(s):\n    \"\"\"Return the words of s in reverse order.\"\"\"\n    return \" \".join(s.split()[::-1])\n```",
+  "usage": {
+    "prompt_tokens": 301,
+    "completion_tokens": 44,
+    "total_tokens": 345,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": false,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

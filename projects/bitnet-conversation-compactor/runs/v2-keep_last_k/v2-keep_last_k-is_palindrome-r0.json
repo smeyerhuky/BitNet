@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef is_palindrome(s: str) -> bool:\n    \"\"\"Check if a string is a palindrome.\"\"\"\n    # Normalizing to lowercase and removing non-alphanumeric characters\n    # is a common standard for palindrome checks.\n    clean_s = \"\".join(char.lower() for char in s if char.isalnum())\n    return clean_s == clean_s[::-1]\n```",
+  "usage": {
+    "prompt_tokens": 306,
+    "completion_tokens": 96,
+    "total_tokens": 402,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef parse_duration(s):\n    \"\"\"Parse a duration string (e.g., '1h30m15s') and return total seconds.\"\"\"\n    pattern = r'(?:(?P<hours>\\d+)h)?(?:(?P<minutes>\\d+)m)?(?:(?P<seconds>\\d+)s)?'\n    match = re.fullmatch(pattern, s)\n    if not match or s == \"\":\n        return 0\n    \n    parts = match.groupdict()\n    total = 0\n    if parts['hours']:\n        total += int(parts['hours']) * 3600\n    if parts['minutes']:\n        total += int(parts['minutes']) * 60\n    if parts['seconds']:\n        total += int(parts['seconds'])\n    return total\n```",
+  "usage": {
+    "prompt_tokens": 315,
+    "completion_tokens": 194,
+    "total_tokens": 509,
+    "prompt_tokens_details": {
+      "cached_tokens": 192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

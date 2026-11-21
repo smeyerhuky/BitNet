@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef parse_duration(s):\n    \"\"\"Parse a duration string (e.g., '1h30m15s') and return total seconds.\"\"\"\n    units = {'h': 3600, 'm': 60, 's': 1}\n    pattern = r'(\\d+)([hms])'\n    matches = re.findall(pattern, s)\n    return sum(int(value) * units[unit] for value, unit in matches)\n```",
+  "usage": {
+    "prompt_tokens": 315,
+    "completion_tokens": 121,
+    "total_tokens": 436,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

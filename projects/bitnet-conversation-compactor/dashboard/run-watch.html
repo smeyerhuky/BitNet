@@ -452,6 +452,106 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
     sel.value = keep;
   }
 
+  /* ---- Formatted rendering. Untrusted text becomes DOM nodes, never HTML strings. ---- */
+  var HL = (window.hljs) || null;
+
+  function codeBlock(lang, code) {
+    var wrap = el("div", null, "codewrap");
+    var language = (lang || "").trim().toLowerCase();
+    if (language) wrap.appendChild(el("div", language, "code-lang"));
+    var pre = el("pre", null, "code"), c = el("code");
+    c.textContent = code;
+    if (language) c.className = "language-" + language;
+    pre.appendChild(c); wrap.appendChild(pre);
+    if (HL) {
+      try { HL.highlightElement(c); } catch (e) { /* leave plain text */ }
+    }
+    return wrap;
+  }
+
+  function inline(text) {
+    // Inline code and bold only. Everything else stays literal text.
+    var frag = document.createDocumentFragment();
+    text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/).forEach(function (part) {
+      if (!part) return;
+      if (part.charAt(0) === "`" && part.charAt(part.length - 1) === "`" && part.length > 2) frag.appendChild(el("code", part.slice(1, -1)));
+      else if (part.indexOf("**") === 0 && part.slice(-2) === "**" && part.length > 4) frag.appendChild(el("strong", part.slice(2, -2)));
+      else frag.appendChild(document.createTextNode(part));
+    });
+    return frag;
+  }
+
+  function prose(block) {
+    var lines = block.split("\n"), out = [], list = null;
+    lines.forEach(function (line) {
+      var m = /^(\s*)[-*] (.*)$/.exec(line), h = /^(#{1,3}) (.*)$/.exec(line);
+      if (m) {
+        if (!list) { list = el("ul"); out.push(list); }
+        var li = el("li"); li.appendChild(inline(m[2])); list.appendChild(li);
+        return;
+      }
+      list = null;
+      if (h) { var hd = el(h[1].length === 1 ? "h3" : "h4"); hd.appendChild(inline(h[2])); out.push(hd); return; }
+      if (line.trim() === "") return;
+      var p = el("p"); p.appendChild(inline(line)); out.push(p);
+    });
+    return out;
+  }
+
+  // Fenced code blocks split out first; the rest is paragraphs, lists and headings.
+  function markdown(text) {
+    var root = el("div", null, "md");
+    var parts = String(text == null ? "" : text).split(/```([^\n`]*)\n([\s\S]*?)```/);
+    for (var i = 0; i < parts.length; i++) {
+      if (i % 3 === 0) { prose(parts[i]).forEach(function (n) { root.appendChild(n); }); }
+      else if (i % 3 === 1) { root.appendChild(codeBlock(parts[i], parts[i + 1])); i++; }
+    }
+    if (!root.childNodes.length) root.appendChild(el("p", ""));
+    return root;
+  }
+
+  function toolCard(call) {
+    var card = el("div", null, "toolcard");
+    card.appendChild(el("div", "tool call", "who"));
+    var fn = call.function || {};
+    card.appendChild(el("div", fn.name || call.name || "tool", "tname"));
+    var raw = fn.arguments != null ? fn.arguments : call.arguments;
+    var pretty = raw == null ? "" : raw;
+    try { pretty = JSON.stringify(typeof raw === "string" ? JSON.parse(raw) : raw, null, 2); } catch (e) { pretty = String(raw); }
+    card.appendChild(codeBlock("json", pretty));
+    return card;
+  }
+
+  function toolResultCard(m) {
+    var card = el("div", null, "toolcard");
+    card.appendChild(el("div", "tool result" + (m.tool_call_id ? " · " + m.tool_call_id : ""), "who"));
+    card.appendChild(markdown(m.content));
+    return card;
+  }
+
+  // Long bodies collapse so a long history stays scannable; short ones stay open.
+  function bubble(role, label, body, length) {
+    var box = el("div", null, "msg " + role);
+    box.appendChild(el("div", label, "who"));
+    if (length > 1500) {
+      var d = document.createElement("details"); d.className = "long";
+      d.appendChild(el("summary", "Show " + length.toLocaleString() + " characters"));
+      d.appendChild(body); box.appendChild(d);
+    } else box.appendChild(body);
+    return box;
+  }
+
+  // A message in OpenAI-style shape: role, content, optional tool_calls (assistant) or tool_call_id (tool).
+  function messageNode(m, label) {
+    if (m.role === "tool") return toolResultCard(m);
+    var text = typeof m.content === "string" ? m.content : (m.content == null ? "" : JSON.stringify(m.content));
+    var wrap = el("div");
+    var role = m.role === "assistant" ? "assistant" : m.role === "system" ? "system" : "user";
+    wrap.appendChild(bubble(role, label || m.role, markdown(text), text.length));
+    (m.tool_calls || []).forEach(function (c) { wrap.appendChild(toolCard(c)); });
+    return wrap;
+  }
+
   function msgBlock(role, label, text) {
     var full = text == null ? "" : String(text);
     return bubble(role, label, markdown(full), full.length);
