@@ -79,3 +79,12 @@
 2026-11-21T08:07:39Z done v2-structural-chunk_list-r2 beh=False dec=False prompt=191 [78/108] spent=358988
 2026-11-21T08:07:41Z done v2-structural-count_vowels-r0 beh=True dec=False prompt=181 [79/108] spent=359226
 2026-11-21T08:07:44Z done v2-structural-count_vowels-r1 beh=True dec=False prompt=181 [80/108] spent=359469
+2026-11-21T08:07:55Z done v2-structural-count_vowels-r2 beh=True dec=False prompt=181 [81/108] spent=359712
+2026-11-21T08:08:17Z done v2-structural-dedupe_keep_order-r0 beh=True dec=False prompt=188 [82/108] spent=359981
+2026-11-21T08:08:25Z done v2-structural-dedupe_keep_order-r1 beh=True dec=False prompt=188 [83/108] spent=360250
+2026-11-21T08:08:27Z done v2-structural-dedupe_keep_order-r2 beh=True dec=False prompt=188 [84/108] spent=360519
+2026-11-21T08:08:33Z done v2-structural-flatten-r0 beh=True dec=False prompt=181 [85/108] spent=360775
+2026-11-21T08:08:35Z done v2-structural-flatten-r1 beh=True dec=False prompt=181 [86/108] spent=361031
+2026-11-21T08:08:38Z done v2-structural-flatten-r2 beh=True dec=False prompt=181 [87/108] spent=361287
+2026-11-21T08:08:40Z done v2-structural-is_palindrome-r0 beh=False dec=False prompt=185 [88/108] spent=361515
+2026-11-21T08:08:43Z done v2-structural-is_palindrome-r1 beh=False dec=False prompt=185 [89/108] spent=361743
