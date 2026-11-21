@@ -8,3 +8,4 @@ Coding conversations for the compactor experiments.
 * [build_v2.py](build_v2.py) - builds v2 conversations (about 3,250-token histories) and validates references
 * [conversations/](conversations/) - v1 conversation JSON files (12)
 * [conversations_v2/](conversations_v2/) - v2 conversation JSON files (12)
+* [swe/pilot_ids.json](swe/pilot_ids.json) - SWE-bench Verified pilot selection: 19 Django tasks (version 4.2 or 5.0, easiest band); license not verified
