@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef chunk_list(xs, n):\n    \"\"\"Split xs into consecutive chunks of size n.\"\"\"\n    return [xs[i : i + n] for i in range(0, len(xs), n)]\n```",
+  "usage": {
+    "prompt_tokens": 312,
+    "completion_tokens": 57,
+    "total_tokens": 369,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": false,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

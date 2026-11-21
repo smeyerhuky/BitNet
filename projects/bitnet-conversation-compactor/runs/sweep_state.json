@@ -34,7 +34,13 @@
   "v2-retrieval-running_mean-r1": "done",
   "v2-retrieval-running_mean-r2": "done",
   "v2-retrieval-slugify-r0": "done",
-  "v2-retrieval-slugify-r1": "done"
+  "v2-retrieval-slugify-r1": "done",
+  "v2-retrieval-slugify-r2": "done",
+  "v2-keep_last_k-binary_search-r0": "done",
+  "v2-keep_last_k-binary_search-r1": "done",
+  "v2-keep_last_k-binary_search-r2": "done",
+  "v2-keep_last_k-chunk_list-r0": "done",
+  "v2-keep_last_k-chunk_list-r1": "done"
  },
  "started": null,
  "conditions": [
