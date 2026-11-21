@@ -65,3 +65,5 @@
 2026-11-21T08:06:07Z done v2-keep_last_k-roman_to_int-r0 beh=True dec=False prompt=309 [64/108] spent=353994
 2026-11-21T08:06:14Z done v2-keep_last_k-roman_to_int-r1 beh=True dec=False prompt=309 [65/108] spent=354463
 2026-11-21T08:06:26Z done v2-keep_last_k-roman_to_int-r2 beh=True dec=False prompt=309 [66/108] spent=354932
+2026-11-21T08:06:40Z done v2-keep_last_k-running_mean-r0 beh=True dec=False prompt=304 [67/108] spent=355321
+2026-11-21T08:06:44Z done v2-keep_last_k-running_mean-r1 beh=True dec=False prompt=304 [68/108] spent=355710
