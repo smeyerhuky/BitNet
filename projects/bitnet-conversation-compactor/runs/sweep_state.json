@@ -76,7 +76,10 @@
   "v2-structural-binary_search-r1": "done",
   "v2-structural-binary_search-r2": "done",
   "v2-structural-chunk_list-r0": "done",
-  "v2-structural-chunk_list-r1": "done"
+  "v2-structural-chunk_list-r1": "done",
+  "v2-structural-chunk_list-r2": "done",
+  "v2-structural-count_vowels-r0": "done",
+  "v2-structural-count_vowels-r1": "done"
  },
  "started": null,
  "conditions": [

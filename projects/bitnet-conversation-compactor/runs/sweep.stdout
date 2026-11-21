@@ -76,3 +76,6 @@
 2026-11-21T08:07:26Z done v2-structural-binary_search-r2 beh=True dec=False prompt=191 [75/108] spent=358244
 2026-11-21T08:07:30Z done v2-structural-chunk_list-r0 beh=False dec=False prompt=191 [76/108] spent=358492
 2026-11-21T08:07:33Z done v2-structural-chunk_list-r1 beh=False dec=False prompt=191 [77/108] spent=358740
+2026-11-21T08:07:39Z done v2-structural-chunk_list-r2 beh=False dec=False prompt=191 [78/108] spent=358988
+2026-11-21T08:07:41Z done v2-structural-count_vowels-r0 beh=True dec=False prompt=181 [79/108] spent=359226
+2026-11-21T08:07:44Z done v2-structural-count_vowels-r1 beh=True dec=False prompt=181 [80/108] spent=359469
