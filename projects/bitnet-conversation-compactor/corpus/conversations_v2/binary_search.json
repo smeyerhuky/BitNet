@@ -1,0 +1,212 @@
+{
+  "id": "binary_search",
+  "corpus": "v2",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# TODO: implement binary_search(xs, target)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Project decision for utils, please record it: With duplicates, return the last matching index; the log-compaction code depends on it."
+    },
+    {
+      "role": "assistant",
+      "content": "Recorded. I will apply this rule to every utils function from now on."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside config_loader_step0 in config_loader.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef config_loader_step0(payload):\n    logger.debug('config_loader: step 0 got %d keys', len(payload))\n    return {**payload, 'step': 0}\n```\n\nThe change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside http_retry_step1 in http_retry.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef http_retry_step1(payload):\n    logger.debug('http_retry: step 1 got %d keys', len(payload))\n    return {**payload, 'step': 1}\n```\n\nI placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside csv_export_step2 in csv_export.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef csv_export_step2(payload):\n    logger.debug('csv_export: step 2 got %d keys', len(payload))\n    return {**payload, 'step': 2}\n```\n\nCallers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside metrics_step3 in metrics.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef metrics_step3(payload):\n    logger.debug('metrics: step 3 got %d keys', len(payload))\n    return {**payload, 'step': 3}\n```\n\nThe module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside lru_cache_step4 in lru_cache.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef lru_cache_step4(payload):\n    logger.debug('lru_cache: step 4 got %d keys', len(payload))\n    return {**payload, 'step': 4}\n```\n\nNo new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside date_utils_step5 in date_utils.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef date_utils_step5(payload):\n    logger.debug('date_utils: step 5 got %d keys', len(payload))\n    return {**payload, 'step': 5}\n```\n\nTests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside config_loader_step6 in config_loader.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef config_loader_step6(payload):\n    logger.debug('config_loader: step 6 got %d keys', len(payload))\n    return {**payload, 'step': 6}\n```\n\nThe change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside http_retry_step7 in http_retry.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef http_retry_step7(payload):\n    logger.debug('http_retry: step 7 got %d keys', len(payload))\n    return {**payload, 'step': 7}\n```\n\nI placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside csv_export_step8 in csv_export.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef csv_export_step8(payload):\n    logger.debug('csv_export: step 8 got %d keys', len(payload))\n    return {**payload, 'step': 8}\n```\n\nCallers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside metrics_step9 in metrics.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef metrics_step9(payload):\n    logger.debug('metrics: step 9 got %d keys', len(payload))\n    return {**payload, 'step': 9}\n```\n\nThe module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside lru_cache_step10 in lru_cache.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef lru_cache_step10(payload):\n    logger.debug('lru_cache: step 10 got %d keys', len(payload))\n    return {**payload, 'step': 10}\n```\n\nNo new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside date_utils_step11 in date_utils.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef date_utils_step11(payload):\n    logger.debug('date_utils: step 11 got %d keys', len(payload))\n    return {**payload, 'step': 11}\n```\n\nTests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside config_loader_step12 in config_loader.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef config_loader_step12(payload):\n    logger.debug('config_loader: step 12 got %d keys', len(payload))\n    return {**payload, 'step': 12}\n```\n\nThe change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside http_retry_step13 in http_retry.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef http_retry_step13(payload):\n    logger.debug('http_retry: step 13 got %d keys', len(payload))\n    return {**payload, 'step': 13}\n```\n\nI placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside csv_export_step14 in csv_export.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef csv_export_step14(payload):\n    logger.debug('csv_export: step 14 got %d keys', len(payload))\n    return {**payload, 'step': 14}\n```\n\nCallers that pass an empty payload still get a dict with the step key. The module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside metrics_step15 in metrics.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef metrics_step15(payload):\n    logger.debug('metrics: step 15 got %d keys', len(payload))\n    return {**payload, 'step': 15}\n```\n\nThe module logger comes from logging.getLogger(__name__), so levels follow the package config. No new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside lru_cache_step16 in lru_cache.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef lru_cache_step16(payload):\n    logger.debug('lru_cache: step 16 got %d keys', len(payload))\n    return {**payload, 'step': 16}\n```\n\nNo new dependencies were added; this stays within the standard library. Tests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output."
+    },
+    {
+      "role": "user",
+      "content": "Add a debug log line inside date_utils_step17 in date_utils.py, and show me the function."
+    },
+    {
+      "role": "assistant",
+      "content": "```python\nimport logging\nlogger = logging.getLogger(__name__)\n\ndef date_utils_step17(payload):\n    logger.debug('date_utils: step 17 got %d keys', len(payload))\n    return {**payload, 'step': 17}\n```\n\nTests for this module still pass after the edit, and coverage did not drop. The change is small and keeps the public signature unchanged. I placed the log call before the return so the value is visible in debug output. Callers that pass an empty payload still get a dict with the step key."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Anything blocking the release?"
+    },
+    {
+      "role": "assistant",
+      "content": "No blockers. Only the utils functions listed in the backlog remain."
+    }
+  ],
+  "request": "Implement binary_search(xs, target) in utils.py. Return an index of target in sorted list xs, or -1 if absent. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert binary_search([1,3,5,7], 5) == 2\nassert binary_search([1,3,5,7], 4) == -1\nassert binary_search([], 1) == -1\n",
+    "constraint_tests": "assert binary_search([1,1,1], 1) == 2\n",
+    "reference": "def binary_search(xs, target):\n    lo, hi, found = 0, len(xs) - 1, -1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if xs[mid] == target:\n            found = mid\n            lo = mid + 1\n        elif xs[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return found\n",
+    "decision": "With duplicates, return the last matching index; the log-compaction code depends on it."
+  }
+}
