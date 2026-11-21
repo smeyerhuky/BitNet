@@ -37,10 +37,27 @@ def retry(fn, tries=4):
             time.sleep(min(60, 10 * 2 ** attempt))
 
 
+ROWS_CACHE = ROOT / "runs" / "swe" / "verified_rows.json"
+
+
+def load_rows():
+    """All 500 Verified rows, paged from the datasets server and cached. Lookup is by instance_id,
+    because the search endpoint does not match on id (it returned one row for every query)."""
+    if ROWS_CACHE.exists():
+        return {r["instance_id"]: r for r in json.loads(ROWS_CACHE.read_text())}
+    rows = []
+    for off in range(0, 500, 100):
+        url = ("https://datasets-server.huggingface.co/rows?dataset=princeton-nlp%2FSWE-bench_Verified"
+               f"&config=default&split=test&offset={off}&length=100")
+        rows += [r["row"] for r in retry(lambda: json.load(urllib.request.urlopen(url, timeout=120))["rows"])]
+    ROWS_CACHE.write_text(json.dumps(rows))
+    return {r["instance_id"]: r for r in rows}
+
+
 def fetch_row(iid):
-    url = ("https://datasets-server.huggingface.co/search?dataset=princeton-nlp%2FSWE-bench_Verified"
-           f"&config=default&split=test&query={iid}&offset=0&length=1")
-    return retry(lambda: json.load(urllib.request.urlopen(url, timeout=120))["rows"][0]["row"])
+    row = load_rows()[iid]
+    assert row["instance_id"] == iid
+    return row
 
 
 def touched_files(patch):
