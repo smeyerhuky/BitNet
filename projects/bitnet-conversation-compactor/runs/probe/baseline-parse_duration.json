@@ -1,0 +1,8 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef parse_duration(s):\n    \"\"\"Parse a duration like '1h30m15s' and return total seconds as float.\"\"\"\n    pattern = re.compile(r'(?:(?P<hours>\\d+)h)?(?:(?P<minutes>\\d+)m)?(?:(?P<seconds>\\d+)s)?')\n    match = pattern.fullmatch(s)\n    if not match:\n        raise ValueError(f\"Invalid duration format: {s}\")\n    \n    parts = match.groupdict()\n    total = 0.0\n    if parts['hours']:\n        total += float(parts['hours']) * 3600\n    if parts['minutes']:\n        total += float(parts['minutes']) * 60\n    if parts['seconds']:\n        total += float(parts['seconds'])\n        \n    return total\n```",
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

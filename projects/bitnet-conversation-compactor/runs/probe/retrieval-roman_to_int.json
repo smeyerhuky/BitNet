@@ -1,0 +1,8 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef roman_to_int(s: str) -> int:\n    \"\"\"Convert a Roman numeral to an integer.\"\"\"\n    roman_map = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}\n    \n    # Validate input characters\n    for char in s:\n        if char not in roman_map:\n            raise ValueError(f\"Invalid Roman numeral character: {char}\")\n            \n    total = 0\n    prev_value = 0\n    # Process from right to left to handle subtractive pairs easily\n    for char in reversed(s):\n        value = roman_map[char]\n        if value < prev_value:\n            total -= value\n        else:\n            total += value\n        prev_value = value\n        \n    return total\n```",
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

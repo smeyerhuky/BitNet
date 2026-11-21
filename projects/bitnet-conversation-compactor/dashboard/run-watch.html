@@ -1,0 +1,173 @@
+<title>Compactor Run Watch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Plan: a bench instrument log. Ink-and-paper neutrals with a warm amber accent for
+   the live signal, green and red only for pass and fail. Space Grotesk for figures and
+   headings, Inter for text. One row per run, newest first. */
+:root {
+  --bg: #f4f2ec; --panel: #ffffff; --fg: #1b1d22; --muted: #62666f; --line: #dcd8cd;
+  --accent: #b87410; --pass: #237a52; --fail: #b8432f; --tile: #efece4;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15171b; --panel: #1d2026; --fg: #eceae4; --muted: #9ba0aa; --line: #2e323b;
+    --accent: #e8a93a; --pass: #4cc38a; --fail: #ef7a63; --tile: #242830; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15171b; --panel: #1d2026; --fg: #eceae4; --muted: #9ba0aa; --line: #2e323b;
+  --accent: #e8a93a; --pass: #4cc38a; --fail: #ef7a63; --tile: #242830; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 14px/1.5 Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+h1, h2, .fig { font-family: "Space Grotesk", Inter, system-ui, sans-serif; }
+h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 15px; margin: 0 0 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: baseline; justify-content: space-between; }
+.live { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.dot.on { background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+.note { color: var(--muted); font-size: 13px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.tile { background: var(--tile); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.tile .fig { font-size: 30px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 4px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+.scroll { overflow-x: auto; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.pill.pass { color: var(--pass); background: color-mix(in srgb, var(--pass) 14%, transparent); }
+.pill.fail { color: var(--fail); background: color-mix(in srgb, var(--fail) 14%, transparent); }
+.empty { padding: 28px 8px; text-align: center; color: var(--muted); }
+.empty strong { color: var(--fg); display: block; margin-bottom: 6px; font-size: 15px; }
+.feed li { list-style: none; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); align-items: center; min-width: 0; }
+.feed ul { margin: 0; padding: 0; }
+.feed .id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.feed .meta { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bar { height: 8px; background: var(--tile); border-radius: 999px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); }
+.budget { display: grid; gap: 6px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .dot.on { animation: pulse 2.4s ease-out infinite; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 40%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+</style>
+<div class="wrap">
+  <header>
+    <h1>Compactor run watch</h1>
+    <div class="live"><span class="dot" id="dot"></span><span id="liveText">Connecting to the run store</span></div>
+  </header>
+  <p class="note" id="connNote" hidden>Still waiting for the run store. It may be out of date until it answers.</p>
+
+  <section class="tiles" aria-label="Summary">
+    <div class="tile"><div class="label">Runs</div><div class="fig" id="nRuns">–</div></div>
+    <div class="tile"><div class="label">Behavior pass</div><div class="fig" id="pBeh">–</div></div>
+    <div class="tile"><div class="label">Decision pass</div><div class="fig" id="pDec">–</div></div>
+    <div class="tile"><div class="label">Mean prompt tokens</div><div class="fig" id="mPrompt">–</div></div>
+    <div class="tile"><div class="label">Cached share</div><div class="fig" id="cShare">–</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Budget</h2>
+    <div class="budget">
+      <div class="bar" aria-hidden="true"><span id="budgetBar" style="width:0%"></span></div>
+      <div class="note" id="budgetText">Ledger not yet reported.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>By condition</h2>
+    <div class="scroll" id="byCond"><div class="empty"><strong>No runs yet</strong>Runs appear here as the sweep syncs them into the store.</div></div>
+  </section>
+
+  <section class="panel">
+    <h2>Latest runs</h2>
+    <div class="feed" id="feed"><div class="empty"><strong>No runs yet</strong>Each finished call is a row here, newest first.</div></div>
+  </section>
+</div>
+<script>
+(function () {
+  var dot = document.getElementById("dot"), liveText = document.getElementById("liveText"),
+      connNote = document.getElementById("connNote"), gotData = false, timer = null;
+  function pct(n, d) { return d ? Math.round(100 * n / d) + "%" : "–"; }
+  function el(tag, text, cls) { var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text == null ? "" : String(text); return e; }
+
+  function render(docs) {
+    var runs = docs.filter(Boolean);
+    document.getElementById("nRuns").textContent = runs.length;
+    var n = runs.length, beh = runs.filter(function (r) { return r.behavior_pass; }).length,
+        dec = runs.filter(function (r) { return r.constraint_pass; }).length,
+        prompt = runs.reduce(function (s, r) { return s + (r.input_tokens || 0); }, 0),
+        cached = runs.reduce(function (s, r) { return s + (r.cached_tokens || 0); }, 0);
+    document.getElementById("pBeh").textContent = pct(beh, n);
+    document.getElementById("pDec").textContent = pct(dec, n);
+    document.getElementById("mPrompt").textContent = n ? Math.round(prompt / n).toLocaleString() : "–";
+    document.getElementById("cShare").textContent = pct(cached, prompt);
+
+    var groups = {};
+    runs.forEach(function (r) { var k = r.condition || "unlabelled"; (groups[k] = groups[k] || []).push(r); });
+    var box = document.getElementById("byCond");
+    if (!n) { return; }
+    box.textContent = "";
+    var table = document.createElement("table"), head = document.createElement("tr");
+    ["Condition", "Runs", "Behavior", "Decision", "Mean prompt"].forEach(function (h) { head.appendChild(el("th", h)); });
+    table.appendChild(head);
+    Object.keys(groups).sort().forEach(function (k) {
+      var g = groups[k], gb = g.filter(function (r) { return r.behavior_pass; }).length,
+          gd = g.filter(function (r) { return r.constraint_pass; }).length,
+          gp = Math.round(g.reduce(function (s, r) { return s + (r.input_tokens || 0); }, 0) / g.length);
+      var tr = document.createElement("tr");
+      tr.appendChild(el("td", k)); tr.appendChild(el("td", g.length));
+      tr.appendChild(el("td", pct(gb, g.length))); tr.appendChild(el("td", pct(gd, g.length)));
+      tr.appendChild(el("td", gp.toLocaleString()));
+      table.appendChild(tr);
+    });
+    box.appendChild(table);
+
+    var feed = document.getElementById("feed");
+    feed.textContent = "";
+    var list = document.createElement("ul");
+    runs.slice(0, 30).forEach(function (r) {
+      var li = document.createElement("li");
+      var ok = r.behavior_pass && r.constraint_pass;
+      li.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
+      li.appendChild(el("span", r.run_id || "", "id"));
+      li.appendChild(el("span", (r.input_tokens || 0) + " in · " + (r.cached_tokens || 0) + " cached", "meta"));
+      list.appendChild(li);
+    });
+    feed.appendChild(list);
+  }
+
+  function setLive(on, text) { dot.className = "dot" + (on ? " on" : ""); liveText.textContent = text; }
+
+  async function start() {
+    var claude = window.claude;
+    var db = claude && claude.use ? await claude.use("db") : null;
+    if (!db) { setLive(false, "Live store unavailable in this view"); return; }
+    timer = setTimeout(function () { if (!gotData) connNote.hidden = false; }, 10000);
+    db.doc("feed/latest").onSnapshot(function (d) {
+      if (!d.metadata.fromCache) { gotData = true; clearTimeout(timer); connNote.hidden = true; }
+      if (!d.exists) { setLive(false, "Waiting for the first sync"); return; }
+      var doc = d.data();
+      setLive(true, "Live · " + (doc.run_count || 0) + " runs");
+      render(doc.runs || []);
+      var cap = doc.cap_tokens || 0, spent = doc.spent_tokens || 0;
+      document.getElementById("budgetBar").style.width = (cap ? Math.min(100, 100 * spent / cap) : 0).toFixed(2) + "%";
+      document.getElementById("budgetText").textContent =
+        spent.toLocaleString() + " of " + cap.toLocaleString() + " tokens on the local ledger (not a provider quota)";
+    }, function (e) {
+      clearTimeout(timer);
+      setLive(false, "Store error: " + (e && e.code ? e.code : "unknown"));
+    });
+  start();
+})();
+</script>
