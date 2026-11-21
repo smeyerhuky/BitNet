@@ -31,7 +31,8 @@ def _doc_for(rec):
     }
 
 
-REPLY_CAP = 3000  # characters kept per reply; the flag records any cut
+REPLY_KEEP = 150  # newest runs that carry reply text in the feed
+REPLY_CAP = 800  # characters kept per reply in the feed; the flag records any cut (size limit: 256 KiB per document)
 
 
 def _reply_for(rec):
@@ -53,6 +54,10 @@ def build_doc():
                 latest[rec["run_id"]] = rec
     runs = [dict(_doc_for(rec), **_reply_for(rec)) for rec in latest.values()]
     runs.sort(key=lambda r: (r["ts"] or "", r["run_id"]), reverse=True)
+    # Size guard: only the newest REPLY_KEEP runs carry reply text in the feed (the store limit is 256 KiB per document).
+    for i, r in enumerate(runs):
+        if i >= REPLY_KEEP:
+            r["reply"], r["reply_truncated"] = None, False
     budget = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
     from src import winner  # noqa: E402
     doc = {"winner": winner.build(), "runs": runs, "spent_tokens": budget.get("spent_tokens", 0),

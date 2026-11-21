@@ -8,3 +8,4 @@ Daily, append-only.
 * [2026-11-21-gan-decisions.md](2026-11-21-gan-decisions.md) - GAN search parameters committed after the Sonnet review
 * [2026-11-21-floor-sweep-results.md](2026-11-21-floor-sweep-results.md) - corpus v2 floors: retrieval passes all at 373 tokens; history-dropping floors lose the planted decision
 * [2026-11-21-search-live.md](2026-11-21-search-live.md) - search running; winner view; context fix
+* [2026-11-21-swe-setup.md](2026-11-21-swe-setup.md) - Docker installed; SWE-bench harness setup; feed size guard
