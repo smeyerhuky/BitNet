@@ -6,17 +6,20 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src import budget as B, conditions, records, score, upstream  # noqa: E402
+from src import budget as B, conditions, records, retrieval, score, upstream  # noqa: E402
 
 CONDITIONS = {"baseline": conditions.baseline, "keep_last_k": conditions.keep_last_k, "structural": conditions.structural}
 
 
 def main(condition, n=3, corpus="v1"):
-    build = CONDITIONS[condition]
+    budget = B.Budget(ROOT / "runs" / "budget.json")
+    if condition == "retrieval":
+        build = lambda conv: retrieval.build(conv, budget)[0]  # noqa: E731
+    else:
+        build = CONDITIONS[condition]
     conv_dir = ROOT / "corpus" / ("conversations_v2" if corpus == "v2" else "conversations")
     tag = "" if corpus == "v1" else "v2-"
     condition_label = f"{tag}{condition}"
-    budget = B.Budget(ROOT / "runs" / "budget.json")
     out_dir = ROOT / "runs" / condition_label
     out_dir.mkdir(parents=True, exist_ok=True)
     for path in sorted(conv_dir.glob("*.json")):

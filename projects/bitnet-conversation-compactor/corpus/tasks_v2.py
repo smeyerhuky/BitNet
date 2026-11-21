@@ -28,7 +28,7 @@ TASKS_V2 = [
   tests='assert slugify("Hello, World!") == "hello_world"\nassert slugify("") == ""\n',
   ctest='assert slugify("  A -- B  ") == "a_b"\n'),
  dict(id="chunk_list", fn="chunk_list(xs, n)", desc="Split xs into consecutive chunks of size n; the last chunk may be shorter.",
-  decision="Chunks must be tuples, because the batcher treats them as immutable.",
+  decision="Each individual chunk must be a tuple, because the batcher treats chunks as immutable. The returned collection of chunks stays a list.",
   ref='def chunk_list(xs, n):\n    if n <= 0:\n        raise ValueError("n must be positive")\n    return [tuple(xs[i:i + n]) for i in range(0, len(xs), n)]\n',
   tests='assert chunk_list([1,2,3,4,5], 2) == [(1,2),(3,4),(5,)]\nassert chunk_list([], 3) == []\n',
   ctest='assert all(isinstance(c, tuple) for c in chunk_list([1,2,3], 2))\n'),

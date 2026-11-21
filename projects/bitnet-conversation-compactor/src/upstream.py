@@ -70,3 +70,41 @@ def call(messages, budget, model=DEFAULT_MODEL, temperature=0.5, top_p=1,
 def _estimate_prompt_tokens(messages):
     # Rough pre-call guard only (about 4 characters per token). Real counts come from usage.
     return sum(len(m.get("content", "")) for m in messages) // 4 + 1
+
+
+EMBED_URL = "https://integrate.api.nvidia.com/v1/embeddings"
+EMBED_MODEL = "nvidia/nemotron-3.5-embed-8b"  # the only embedding model this key can reach (probed 2026-11-21)
+
+
+def embed(texts, budget, input_type="passage", model=EMBED_MODEL, batch=16, timeout=120):
+    """Return one embedding vector per text, in order. Charges prompt tokens to the budget."""
+    key = os.environ.get("NVIDIA_API_KEY")
+    if not key:
+        raise RuntimeError("NVIDIA_API_KEY is not set")
+    vectors = []
+    for i in range(0, len(texts), batch):
+        chunk = texts[i:i + batch]
+        payload = {"model": model, "input": chunk, "input_type": input_type, "encoding_format": "float"}
+        budget.check(sum(len(t) for t in chunk) // 3 + 1)
+        req = urllib.request.Request(
+            EMBED_URL, data=json.dumps(payload).encode("utf-8"),
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
+                     "Accept": "application/json"},
+        )
+        wait = MIN_INTERVAL_S - (time.time() - _last_call[0])
+        if wait > 0:
+            time.sleep(wait)
+        started = time.time()
+        _last_call[0] = started
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                body = json.load(resp)
+                headers = dict(resp.headers.items())
+                status = resp.status
+        except urllib.error.HTTPError as e:
+            telemetry.record(EMBED_URL, e.code, payload, None, dict(e.headers.items()), time.time() - started, error=str(e.reason))
+            raise
+        telemetry.record(EMBED_URL, status, payload, body, headers, time.time() - started)
+        budget.charge((body.get("usage") or {}).get("total_tokens", 0))
+        vectors += [d["embedding"] for d in sorted(body["data"], key=lambda d: d["index"])]
+    return vectors
