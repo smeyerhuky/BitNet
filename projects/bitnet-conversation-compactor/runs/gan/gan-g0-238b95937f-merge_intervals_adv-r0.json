@@ -1,0 +1,14 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping or touching [start, end] intervals.\n    Assumes intervals are sorted by start time.\n    \"\"\"\n    if not intervals:\n        return []\n\n    merged = [intervals[0]]\n    for current in intervals[1:]:\n        prev_start, prev_end = merged[-1]\n        curr_start, curr_end = current\n\n        # If the current interval starts before or exactly when the previous one ends, they overlap/touch\n        if curr_start <= prev_end:\n            # Merge by updating the end time of the last interval in the list\n            merged[-1][1] = max(prev_end, curr_end)\n        else:\n            # No overlap, add the current interval as a new entry\n            merged.append(current)\n\n    return merged\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": false
+ },
+ "kept": []
+}

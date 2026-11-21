@@ -1,0 +1,14 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef reverse_words(s: str) -> str:\n    \"\"\"Return the words of s in reverse order.\"\"\"\n    return \" \".join(s.split()[::-1])\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": false
+ },
+ "kept": []
+}
