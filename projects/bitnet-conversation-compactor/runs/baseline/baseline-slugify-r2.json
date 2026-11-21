@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\n# CONSTRAINT: input made only of punctuation returns an empty string.\ndef slugify(title):\n    \"\"\"Convert a title to a URL slug.\"\"\"\n    slug = re.sub(r'[^a-z0-9]+', '-', title.lower())\n    return slug.strip('-')\n```",
+  "usage": {
+    "prompt_tokens": 384,
+    "completion_tokens": 77,
+    "total_tokens": 461,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

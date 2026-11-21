@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\n# CONSTRAINT: invalid input must raise ValueError, never return None.\ndef parse_duration(s):\n    \"\"\"Parse a duration string (e.g., '1h30m15s') into total seconds.\"\"\"\n    pattern = r'^((?P<h>\\d+)h)?((?P<m>\\d+)m)?((?P<s>\\d+)s)?$'\n    match = re.match(pattern, s)\n    if not match or not s:\n        raise ValueError(f\"Invalid duration format: {s}\")\n    \n    parts = match.groupdict()\n    total = 0\n    if parts['h']: total += int(parts['h']) * 3600\n    if parts['m']: total += int(parts['m']) * 60\n    if parts['s']: total += int(parts['s'])\n    return total\n```",
+  "usage": {
+    "prompt_tokens": 387,
+    "completion_tokens": 208,
+    "total_tokens": 595,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

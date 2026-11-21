@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: results are always floats, even for integer input.\ndef running_mean(xs):\n    \"\"\"Return a list of running means of xs.\"\"\"\n    result = []\n    current_sum = 0.0\n    for i, x in enumerate(xs, 1):\n        current_sum += x\n        result.append(current_sum / i)\n    return result\n```",
+  "usage": {
+    "prompt_tokens": 385,
+    "completion_tokens": 96,
+    "total_tokens": 481,
+    "prompt_tokens_details": {
+      "cached_tokens": 384
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

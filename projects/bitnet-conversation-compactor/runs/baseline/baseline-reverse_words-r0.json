@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: whitespace-only input returns an empty string.\ndef reverse_words(s):\n    \"\"\"Return the words of s in reverse order, joined by single spaces.\"\"\"\n    return \" \".join(s.split()[::-1])\n```",
+  "usage": {
+    "prompt_tokens": 374,
+    "completion_tokens": 62,
+    "total_tokens": 436,
+    "prompt_tokens_details": {
+      "cached_tokens": 256
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}
