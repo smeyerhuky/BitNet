@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef count_vowels(s):\n    \"\"\"Count vowels in s, ignoring case.\"\"\"\n    return sum(1 for char in s.lower() if char in 'aeiou')\n```",
+  "usage": {
+    "prompt_tokens": 302,
+    "completion_tokens": 50,
+    "total_tokens": 352,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}
