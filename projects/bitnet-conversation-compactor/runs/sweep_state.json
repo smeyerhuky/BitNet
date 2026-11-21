@@ -25,7 +25,16 @@
   "v2-retrieval-parse_duration-r1": "done",
   "v2-retrieval-parse_duration-r2": "done",
   "v2-retrieval-reverse_words-r0": "done",
-  "v2-retrieval-reverse_words-r1": "done"
+  "v2-retrieval-reverse_words-r1": "done",
+  "v2-retrieval-reverse_words-r2": "done",
+  "v2-retrieval-roman_to_int-r0": "done",
+  "v2-retrieval-roman_to_int-r1": "done",
+  "v2-retrieval-roman_to_int-r2": "done",
+  "v2-retrieval-running_mean-r0": "done",
+  "v2-retrieval-running_mean-r1": "done",
+  "v2-retrieval-running_mean-r2": "done",
+  "v2-retrieval-slugify-r0": "done",
+  "v2-retrieval-slugify-r1": "done"
  },
  "started": null,
  "conditions": [
