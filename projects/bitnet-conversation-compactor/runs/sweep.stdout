@@ -75,3 +75,4 @@
 2026-11-21T08:07:22Z done v2-structural-binary_search-r1 beh=True dec=False prompt=191 [74/108] spent=357929
 2026-11-21T08:07:26Z done v2-structural-binary_search-r2 beh=True dec=False prompt=191 [75/108] spent=358244
 2026-11-21T08:07:30Z done v2-structural-chunk_list-r0 beh=False dec=False prompt=191 [76/108] spent=358492
+2026-11-21T08:07:33Z done v2-structural-chunk_list-r1 beh=False dec=False prompt=191 [77/108] spent=358740
