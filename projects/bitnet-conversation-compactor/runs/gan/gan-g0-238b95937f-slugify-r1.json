@@ -1,0 +1,14 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef slugify(title):\n    \"\"\"\n    Convert a title to a slug: lowercase, non-alphanumeric runs collapsed, \n    no leading or trailing separators.\n    \"\"\"\n    # Convert to lowercase\n    title = title.lower()\n    # Replace non-alphanumeric characters with hyphens\n    title = re.sub(r'[^a-z0-9]+', '-', title)\n    # Strip leading/trailing hyphens\n    return title.strip('-')\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": false
+ },
+ "kept": []
+}

@@ -1,0 +1,14 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef flatten(xs):\n    \"\"\"Flatten arbitrarily nested lists into one flat list. Strings are not split.\"\"\"\n    result = []\n    for item in xs:\n        if isinstance(item, list):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": false
+ },
+ "kept": []
+}
