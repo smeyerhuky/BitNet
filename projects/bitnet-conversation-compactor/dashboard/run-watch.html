@@ -73,13 +73,15 @@ select { font: inherit; color: var(--fg); background: var(--tile); border: 1px s
 .pill.fail { color: var(--fail); background: color-mix(in srgb, var(--fail) 14%, transparent); }
 .empty { padding: 26px 8px; text-align: center; color: var(--muted); }
 .empty strong { color: var(--fg); display: block; margin-bottom: 6px; font-size: 15px; }
-dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); padding: 0; width: min(880px, calc(100vw - 32px)); max-height: calc(100vh - 32px); }
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); padding: 0; box-sizing: border-box; width: min(880px, calc(100vw - 32px)); max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: hidden; }
 dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
 .dlg-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--line); }
 .dlg-head .id { font-family: "Space Grotesk", Inter, sans-serif; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.dlg-body { display: grid; gap: 16px; padding: 16px; overflow-y: auto; max-height: calc(100vh - 110px); grid-template-columns: 1fr; }
-@media (min-width: 760px) { .dlg-body { grid-template-columns: 1fr 240px; } }
-.thread { display: grid; gap: 10px; min-width: 0; }
+.dlg-body { display: grid; gap: 16px; padding: 16px; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; max-height: calc(100vh - 110px); grid-template-columns: minmax(0, 1fr); min-width: 0; }
+@media (min-width: 760px) { .dlg-body { grid-template-columns: minmax(0, 1fr) 240px; } }
+.thread { display: grid; gap: 10px; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.thread > *, .thread details, .thread summary, .codewrap, .md, .toolcard, .msg { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.thread summary { overflow-wrap: anywhere; cursor: pointer; }
 .msg { border-radius: 10px; padding: 10px 12px; min-width: 0; max-width: 100%; }
 .msg .who { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
 .msg pre { white-space: pre-wrap; word-break: break-word; margin: 0; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -104,7 +106,7 @@ dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
 .md ul { margin: 0; padding-left: 20px; }
 .md h3, .md h4 { margin: 0; font-family: "Space Grotesk", Inter, sans-serif; font-size: 15px; }
 .md code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--code-bg); border-radius: 4px; padding: 1px 4px; }
-pre.code { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; max-width: 100%; }
+pre.code { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; overflow-y: hidden; max-width: 100%; min-width: 0; box-sizing: border-box; }
 pre.code code { font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
 .code-lang { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
 .hljs-keyword, .hljs-selector-tag, .hljs-literal { color: var(--syn-kw); }
