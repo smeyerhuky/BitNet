@@ -54,7 +54,8 @@ def build_doc():
     runs = [dict(_doc_for(rec), **_reply_for(rec)) for rec in latest.values()]
     runs.sort(key=lambda r: (r["ts"] or "", r["run_id"]), reverse=True)
     budget = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
-    doc = {"runs": runs, "spent_tokens": budget.get("spent_tokens", 0),
+    from src import winner  # noqa: E402
+    doc = {"winner": winner.build(), "runs": runs, "spent_tokens": budget.get("spent_tokens", 0),
            "cap_tokens": budget.get("cap_tokens", 0), "run_count": len(runs)}
     FEED_DOC.write_text(json.dumps(doc, separators=(",", ":")))
     return len(runs), FEED_DOC.stat().st_size

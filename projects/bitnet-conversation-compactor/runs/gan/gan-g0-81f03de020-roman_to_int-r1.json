@@ -1,0 +1,17 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef roman_to_int(s: str) -> int:\n    \"\"\"Convert a Roman numeral to an integer.\"\"\"\n    roman_map = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    total = 0\n    prev_value = 0\n    for char in reversed(s):\n        value = roman_map[char]\n        if value < prev_value:\n            total -= value\n        else:\n            total += value\n        prev_value = value\n    return total\n```",
+ "genome": {
+  "keep_last_k": 2,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  38,
+  39
+ ]
+}

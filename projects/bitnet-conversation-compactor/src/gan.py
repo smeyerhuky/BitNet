@@ -47,6 +47,18 @@ def log(msg):
     print(line, flush=True)
 
 
+def score_runs(runs):
+    """Fitness and summary for one candidate over its runs (spec v0.3, section 7). Shared with the winner view."""
+    n = len(runs)
+    beh = sum(x["behavior"] for x in runs) / n
+    both = sum(x["behavior"] and x["decision"] for x in runs) / n
+    tok = sum(x["prompt"] for x in runs) / n
+    tok_ratio = tok / BASELINE_PROMPT
+    gate = any(not x["decision"] for x in runs) or (tok < MIN_TOKENS and both < 1)
+    f = (-10 + both - tok_ratio) if gate else (10 * beh - 5 * tok_ratio)
+    return {"fitness": round(f, 4), "behavior": round(beh, 3), "both": round(both, 3), "tokens": round(tok), "gate": gate}
+
+
 # ---------- genome ----------
 FLOORS = [
     {"keep_last_k": 2, "keep_first_k": 0, "retrieval_k": 0, "cos_threshold": 0.0, "keep_set": [],
@@ -177,14 +189,7 @@ class Search:
 
     def fitness(self, g, cids, repeats, split, gen):
         runs = [self.run_one(g, cid, r, split, gen) for cid in cids for r in range(repeats)]
-        n = len(runs)
-        beh = sum(x["behavior"] for x in runs) / n
-        both = sum(x["behavior"] and x["decision"] for x in runs) / n
-        tok = sum(x["prompt"] for x in runs) / n
-        tok_ratio = tok / BASELINE_PROMPT
-        gate = any(not x["decision"] for x in runs) or (tok < MIN_TOKENS and both < 1)
-        f = (-10 + both - tok_ratio) if gate else (10 * beh - 5 * tok_ratio)
-        return {"fitness": round(f, 4), "behavior": round(beh, 3), "both": round(both, 3), "tokens": round(tok), "gate": gate}
+        return score_runs(runs)
 
     def generation(self):
         gen = self.state["gen"]

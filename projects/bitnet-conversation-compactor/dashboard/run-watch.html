@@ -139,13 +139,36 @@ details.group[open] .cta .show { display: none; }
 details.group[open] .cta .hide { display: inline; }
 details.group[open] > summary { border-color: var(--accent); }
 details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid var(--line); }
+
+.viewtabs { display: inline-flex; gap: 4px; background: var(--tile); border: 1px solid var(--line); border-radius: 999px; padding: 3px; justify-self: start; }
+.viewtabs button { border: 0; background: transparent; color: var(--muted); font: 600 13px var(--sans); padding: 5px 14px; border-radius: 999px; cursor: pointer; }
+.viewtabs button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+.gen { margin-top: 14px; }
+.gen h3 { font: 600 13px var(--sans); margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.gcards { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.gcard { text-align: left; border: 1px solid var(--line); background: var(--tile); border-radius: 10px; padding: 10px 12px; cursor: pointer; min-width: 0; display: grid; gap: 4px; }
+.gcard:hover, .gcard[aria-pressed="true"] { border-color: var(--accent); }
+.gcard .gid { font: 600 12px var(--sans); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gcard .gfit { font: 600 20px "Space Grotesk", Inter, sans-serif; font-variant-numeric: tabular-nums; }
+.gcard .gsub { font-size: 12px; color: var(--muted); }
+.stat { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 1px 8px; justify-self: start; }
+.stat.elite { background: color-mix(in srgb, var(--pass) 18%, transparent); color: var(--pass); }
+.stat.promoted { background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); }
+.stat.dropped, .stat.pending { background: var(--line); color: var(--muted); }
+.gdetail { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 8px; min-width: 0; }
+.gdetail ul { margin: 0; padding-left: 18px; font-size: 13px; }
+.gdetail code { font: 12px ui-monospace, Menlo, monospace; overflow-wrap: anywhere; }
+.runbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.runbtns button { font: 12px ui-monospace, Menlo, monospace; border: 1px solid var(--line); background: var(--tile); color: var(--fg); border-radius: 6px; padding: 4px 8px; cursor: pointer; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 </style>
 <div class="wrap">
   <header>
     <h1>Compactor run watch</h1>
     <div class="live"><span class="dot" id="dot"></span><span id="liveText">Connecting to the run store</span></div>
   </header>
+  <nav class="viewtabs" aria-label="Views"><button type="button" id="tabRuns" aria-pressed="true">Runs</button><button type="button" id="tabWinner" aria-pressed="false">Winner</button></nav>
   <p class="note" id="connNote" hidden>Still waiting for the run store. Figures may be out of date until it answers.</p>
+  <div id="viewRuns">
 
   <section class="tiles" aria-label="Summary">
     <div class="tile"><div class="label">Runs</div><div class="fig" id="nRuns">–</div></div>
@@ -189,6 +212,11 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
     <div id="runs"><p class="empty">No runs yet.</p></div>
     <div class="pager"><button class="closebtn" id="moreBtn" type="button" hidden>Show more</button></div>
   </section>
+  </div>
+  <section class="panel" id="viewWinner" aria-labelledby="winH" hidden>
+    <h2 id="winH">Winner</h2>
+    <div id="winnerBody"><p class="empty">No generations yet.</p></div>
+  </section>
 </div>
 
 <dialog id="inspector" aria-labelledby="dlgId">
@@ -224,6 +252,8 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
     filter: { cond: "", res: "", conv: "", q: "", sort: "newest", group: true },
     page: 1,
     openGroups: {},
+    view: "runs",
+    selected: null,
     modal: { open: false, runId: null },
     errorCode: null
   };
@@ -240,6 +270,8 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
       case "CONTEXT_ERR": return Object.assign({}, s, { context: "failed", conversations: {}, errorCode: ev.code });
       case "FILTER": return Object.assign({}, s, { filter: Object.assign({}, s.filter, ev.patch), page: 1 });
       case "GROUP_TOGGLE": var og = Object.assign({}, s.openGroups); og[ev.key] = ev.open; return Object.assign({}, s, { openGroups: og });
+      case "VIEW": return Object.assign({}, s, { view: ev.view });
+      case "SELECT": return Object.assign({}, s, { selected: ev.id });
       case "PAGE_MORE": return Object.assign({}, s, { page: s.page + 1 });
       case "RESET_FILTER": return Object.assign({}, s, { filter: Object.assign({}, initial.filter), page: 1 });
       case "OPEN_RUN": return Object.assign({}, s, { modal: { open: true, runId: ev.runId } });
@@ -590,11 +622,72 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
     if (!dlg.open) dlg.showModal();
   }
 
+  function renderWinner(s) {
+    var show = s.view === "winner";
+    document.getElementById("viewRuns").hidden = show;
+    document.getElementById("viewWinner").hidden = !show;
+    document.getElementById("tabRuns").setAttribute("aria-pressed", String(!show));
+    document.getElementById("tabWinner").setAttribute("aria-pressed", String(show));
+    if (!show) return;
+    var box = document.getElementById("winnerBody");
+    box.textContent = "";
+    var w = s.feed && s.feed.winner;
+    if (!w || !w.generations || !w.generations.length) {
+      box.appendChild(el("p", "No generations yet. Each generation appears here once its candidates are scored.", "empty"));
+      return;
+    }
+    var byId = {};
+    w.generations.forEach(function (g) { g.candidates.forEach(function (c) { byId[c.id] = c; }); });
+    w.generations.forEach(function (g) {
+      var sec = el("section", null, "gen");
+      sec.appendChild(el("h3", "Generation " + g.gen + " · " + g.candidates.length + " candidates"));
+      var grid = el("div", null, "gcards");
+      g.candidates.forEach(function (c) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "gcard"; b.setAttribute("aria-pressed", String(s.selected === c.id));
+        b.appendChild(el("span", c.id, "gid"));
+        b.appendChild(el("span", c.search ? c.search.fitness.toFixed(2) : "–", "gfit"));
+        b.appendChild(el("span", c.search ? fmt(c.search.tokens) + " tokens · " + Math.round(c.search.both * 100) + "% pass" : "not scored", "gsub"));
+        b.appendChild(el("span", c.status, "stat " + c.status));
+        b.addEventListener("click", function () { dispatch({ type: "SELECT", id: c.id }); });
+        grid.appendChild(b);
+      });
+      sec.appendChild(grid);
+      box.appendChild(sec);
+    });
+    var c = s.selected && byId[s.selected];
+    if (!c) { box.appendChild(el("p", "Select a candidate to see why it was kept and what changed.", "note")); return; }
+    var d = el("div", null, "gdetail");
+    d.appendChild(el("h3", "Candidate " + c.id + " · generation " + c.gen));
+    var why = c.status === "elite" ? "Kept as an elite: among the top " + 2 + " by search fitness, carried over unchanged."
+      : c.status === "promoted" ? "Promoted to the selection set: among the top 2 by search fitness."
+      : c.status === "dropped" ? "Not kept: below the top candidates by search fitness." : "Not yet scored.";
+    d.appendChild(el("p", why));
+    if (c.search) d.appendChild(el("p", "Search: fitness " + c.search.fitness.toFixed(3) + ", behavior " + Math.round(c.search.behavior * 100) + "%, both " + Math.round(c.search.both * 100) + "%, " + fmt(c.search.tokens) + " prompt tokens" + (c.search.gate ? " (decision gate applied)" : "") + "."));
+    if (c.selection) d.appendChild(el("p", "Selection: fitness " + c.selection.fitness.toFixed(3) + ", " + fmt(c.selection.tokens) + " prompt tokens."));
+    var ch = el("div"); ch.appendChild(el("strong", c.closest_prev ? "Changes from closest candidate " + c.closest_prev : "Seed candidate (no earlier generation)"));
+    var ul = el("ul");
+    (c.changes || []).forEach(function (x) { ul.appendChild(el("li", x)); });
+    if (!(c.changes || []).length && c.closest_prev) ul.appendChild(el("li", "Identical genome to " + c.closest_prev));
+    ch.appendChild(ul); d.appendChild(ch);
+    d.appendChild(el("strong", "Genome"));
+    d.appendChild(el("code", JSON.stringify(c.genome)));
+    var rb = el("div", null, "runbtns");
+    (c.runs || []).forEach(function (rid) {
+      var b = el("button", rid, ""); b.type = "button";
+      b.addEventListener("click", function () { dispatch({ type: "OPEN_RUN", runId: rid }); });
+      rb.appendChild(b);
+    });
+    d.appendChild(rb);
+    box.appendChild(d);
+  }
+
   function render(s, before) {
     renderLive(s);
     renderSummary(s);
     renderCharts(s);
     syncFilterOptions(s);
+    renderWinner(s);
     renderRuns(s);
     renderModal(s);
   }
@@ -607,6 +700,8 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
   document.getElementById("groupFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { group: e.target.checked } }); });
   document.getElementById("qFilter").addEventListener("input", function (e) { dispatch({ type: "FILTER", patch: { q: e.target.value } }); });
   document.getElementById("moreBtn").addEventListener("click", function () { dispatch({ type: "PAGE_MORE" }); });
+  document.getElementById("tabRuns").addEventListener("click", function () { dispatch({ type: "VIEW", view: "runs" }); });
+  document.getElementById("tabWinner").addEventListener("click", function () { dispatch({ type: "VIEW", view: "winner" }); });
   document.getElementById("resetFilter").addEventListener("click", function () {
     document.getElementById("qFilter").value = "";
     document.getElementById("groupFilter").checked = true;
