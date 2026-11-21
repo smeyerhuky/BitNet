@@ -60,7 +60,8 @@ def build_doc():
             r["reply"], r["reply_truncated"] = None, False
     budget = json.loads(BUDGET.read_text()) if BUDGET.exists() else {}
     from src import winner  # noqa: E402
-    doc = {"winner": winner.build(), "runs": runs, "spent_tokens": budget.get("spent_tokens", 0),
+    import time
+    doc = {"updated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "winner": winner.build(), "runs": runs, "spent_tokens": budget.get("spent_tokens", 0),
            "cap_tokens": budget.get("cap_tokens", 0), "run_count": len(runs)}
     FEED_DOC.write_text(json.dumps(doc, separators=(",", ":")))
     return len(runs), FEED_DOC.stat().st_size

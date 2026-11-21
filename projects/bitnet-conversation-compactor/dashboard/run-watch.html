@@ -165,6 +165,7 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
   <header>
     <h1>Compactor run watch</h1>
     <div class="live"><span class="dot" id="dot"></span><span id="liveText">Connecting to the run store</span></div>
+    <div class="note" id="updatedAt" aria-live="polite"></div>
   </header>
   <nav class="viewtabs" aria-label="Views"><button type="button" id="tabRuns" aria-pressed="true">Runs</button><button type="button" id="tabWinner" aria-pressed="false">Winner</button></nav>
   <p class="note" id="connNote" hidden>Still waiting for the run store. Figures may be out of date until it answers.</p>
@@ -317,7 +318,16 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
     return g;
   }
 
+  function ageText(iso) {
+    var s = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
+    if (s < 90) return s + " s ago";
+    if (s < 5400) return Math.round(s / 60) + " min ago";
+    return Math.round(s / 3600) + " h ago";
+  }
+
   function renderLive(s) {
+    var upd = document.getElementById("updatedAt");
+    upd.textContent = s.feed && s.feed.updated ? "Last updated " + new Date(s.feed.updated).toLocaleString() + " · " + ageText(s.feed.updated) : "";
     var dot = document.getElementById("dot"), text = document.getElementById("liveText");
     var connNote = document.getElementById("connNote");
     connNote.hidden = !(s.stale && s.conn !== "live");
@@ -736,5 +746,6 @@ details.group > ul { margin: 4px 0 0; padding: 0 0 0 8px; border-left: 2px solid
 
   render(state, null);
   start();
+  setInterval(function () { render(state, null); }, 30000);  // keeps the "ago" text current
 })();
 </script>
