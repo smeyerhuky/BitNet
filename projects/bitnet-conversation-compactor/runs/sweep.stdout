@@ -88,3 +88,5 @@
 2026-11-21T08:08:38Z done v2-structural-flatten-r2 beh=True dec=False prompt=181 [87/108] spent=361287
 2026-11-21T08:08:40Z done v2-structural-is_palindrome-r0 beh=False dec=False prompt=185 [88/108] spent=361515
 2026-11-21T08:08:43Z done v2-structural-is_palindrome-r1 beh=False dec=False prompt=185 [89/108] spent=361743
+2026-11-21T08:08:46Z done v2-structural-is_palindrome-r2 beh=False dec=False prompt=185 [90/108] spent=361971
+2026-11-21T08:08:50Z done v2-structural-merge_intervals-r0 beh=False dec=False prompt=186 [91/108] spent=362337

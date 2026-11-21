@@ -88,7 +88,9 @@
   "v2-structural-flatten-r1": "done",
   "v2-structural-flatten-r2": "done",
   "v2-structural-is_palindrome-r0": "done",
-  "v2-structural-is_palindrome-r1": "done"
+  "v2-structural-is_palindrome-r1": "done",
+  "v2-structural-is_palindrome-r2": "done",
+  "v2-structural-merge_intervals-r0": "done"
  },
  "started": null,
  "conditions": [
