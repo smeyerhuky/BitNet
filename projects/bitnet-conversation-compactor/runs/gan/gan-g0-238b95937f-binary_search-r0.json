@@ -1,0 +1,14 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef binary_search(xs, target):\n    \"\"\"\n    Return an index of target in sorted list xs, or -1 if absent.\n    \"\"\"\n    low = 0\n    high = len(xs) - 1\n\n    while low <= high:\n        mid = (low + high) // 2\n        if xs[mid] == target:\n            return mid\n        elif xs[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n\n    return -1\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 0,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": false
+ },
+ "kept": []
+}
