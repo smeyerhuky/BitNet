@@ -64,7 +64,8 @@
   "v2-keep_last_k-reverse_words-r1": "done",
   "v2-keep_last_k-reverse_words-r2": "done",
   "v2-keep_last_k-roman_to_int-r0": "done",
-  "v2-keep_last_k-roman_to_int-r1": "done"
+  "v2-keep_last_k-roman_to_int-r1": "done",
+  "v2-keep_last_k-roman_to_int-r2": "done"
  },
  "started": null,
  "conditions": [
