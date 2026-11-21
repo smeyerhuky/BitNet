@@ -16,7 +16,7 @@ Project: [bitnet-conversation-compactor](../../bitnet-conversation-compactor/ind
 
 **Problem.** Long conversations resend the full system prompt, tools, notes, and history every turn. That costs tokens and dilutes attention.
 
-**Question.** Can a small BitNet model, used as an in-line compactor, shorten the outgoing request while keeping the upstream answer as good as the uncompacted baseline?
+**Question.** Can a small BitNet model, used as an internal compression layer inside our API, shorten the outgoing request while keeping the upstream answer as good as the uncompacted baseline?
 
 **Success.** A compactor that cuts input tokens by a meaningful margin with no drop in blind-judge score, measured against the baseline with n@k runs.
 

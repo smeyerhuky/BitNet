@@ -1,6 +1,6 @@
 # bitnet-conversation-compactor — Working Notes for Claude Sessions
 
-Question: can a BitNet model, run as an in-line compactor, shorten the conversation we send to an upstream API without hurting the answer?
+Question: can a BitNet model, run as an internal compression layer inside our API, shorten the conversation we send to an upstream API without hurting the answer?
 
 ## Where things are
 

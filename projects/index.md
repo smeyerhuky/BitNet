@@ -6,7 +6,7 @@ okf_version: "0.1"
 
 This folder holds research projects built as knowledge bases. Start here, then follow the links. Cross-project process, architecture, and product material lives in the folders below. Each project has its own KB in `<project>/wiki/`.
 
-* [architecture](architecture/index.md) - system and folder architecture, including where the proxy sits
+* [architecture](architecture/index.md) - system and folder architecture, including where the compression layer sits
 * [process](process/index.md) - how we work: git rules, audit sessions, review cadence
 * [product](product/index.md) - PRDs and review rounds, linked to the projects they drive
 * [pdlc](pdlc/index.md) - product development lifecycle: bookkeeping and refinement
