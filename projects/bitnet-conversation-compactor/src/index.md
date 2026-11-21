@@ -7,3 +7,5 @@ Compactor harness, stdlib only. Phase 0 modules.
 * [cost.py](cost.py) - cache-aware cost model and prefix-cache simulator
 * [records.py](records.py) - append-only JSONL run records with required-field checks
 * [__init__.py](__init__.py) - package marker
+* [telemetry.py](telemetry.py) - middleware: logs every call's shape, headers, status, and usage to runs/api_telemetry.jsonl
+* [telemetry_report.py](telemetry_report.py) - summarizes fingerprint and header changes over time

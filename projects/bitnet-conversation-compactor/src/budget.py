@@ -6,9 +6,9 @@ single run above the per-run limit. State lives in runs/budget.json.
 import json
 import pathlib
 
-PHASE_CAP_TOKENS = 2_000_000
+PHASE_CAP_TOKENS = 10_000_000  # raised from 2M by owner; local ledger only, not a provider quota
 HALT_FRACTION = 0.8
-PER_RUN_LIMIT = 50_000
+PER_RUN_LIMIT = 50_000  # unchanged
 
 
 class BudgetExceeded(RuntimeError):

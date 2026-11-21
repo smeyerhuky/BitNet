@@ -6,7 +6,13 @@ import hashlib
 import json
 import os
 import time
+import urllib.error
 import urllib.request
+
+from src import telemetry
+
+MIN_INTERVAL_S = 60.0 / 40  # community-reported 40 requests per minute
+_last_call = [0.0]
 
 URL = "https://integrate.api.nvidia.com/v1/chat/completions"
 DEFAULT_MODEL = "google/gemma-4-31b-it"
@@ -30,10 +36,22 @@ def call(messages, budget, model=DEFAULT_MODEL, temperature=0.5, top_p=1,
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json",
                  "Accept": "application/json"},
     )
+    wait = MIN_INTERVAL_S - (time.time() - _last_call[0])
+    if wait > 0:
+        time.sleep(wait)
     started = time.time()
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        body = json.load(resp)
+    _last_call[0] = started
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            body = json.load(resp)
+            headers = dict(resp.headers.items())
+            status = resp.status
+    except urllib.error.HTTPError as e:
+        latency = time.time() - started
+        telemetry.record(URL, e.code, payload, None, dict(e.headers.items()), latency, error=str(e.reason))
+        raise
     latency = time.time() - started
+    telemetry.record(URL, status, payload, body, headers, latency)
     choice = body["choices"][0]
     usage = body.get("usage") or {}
     budget.charge(usage.get("total_tokens", 0))
