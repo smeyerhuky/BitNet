@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef is_palindrome(s):\n    \"\"\"Check if s is a palindrome, ignoring digits and case.\"\"\"\n    filtered = [char.lower() for char in s if char.isalpha()]\n    return filtered == filtered[::-1]\n```",
+  "usage": {
+    "prompt_tokens": 350,
+    "completion_tokens": 60,
+    "total_tokens": 410,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

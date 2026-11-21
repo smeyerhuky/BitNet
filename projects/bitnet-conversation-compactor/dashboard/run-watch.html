@@ -151,13 +151,23 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
 
   <section class="panel" aria-labelledby="runsH">
     <h2 id="runsH">Runs</h2>
-    <div class="controls">
+    <div class="controls" role="group" aria-label="Filter runs">
+      <label class="note" for="qFilter">Search</label>
+      <input id="qFilter" type="search" placeholder="run id or conversation" autocomplete="off">
       <label class="note" for="condFilter">Condition</label>
-      <select id="condFilter"><option value="">All conditions</option></select>
+      <select id="condFilter"><option value="">All</option></select>
+      <label class="note" for="convFilter">Conversation</label>
+      <select id="convFilter"><option value="">All</option></select>
       <label class="note" for="resFilter">Result</label>
       <select id="resFilter"><option value="">All</option><option value="pass">Pass both</option><option value="fail">Fail either</option></select>
+      <label class="note" for="sortFilter">Sort</label>
+      <select id="sortFilter"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="tokens">Most input tokens</option><option value="conv">Conversation A–Z</option></select>
+      <label class="note"><input id="groupFilter" type="checkbox" checked> Group by conversation</label>
+      <button class="closebtn" id="resetFilter" type="button">Reset</button>
     </div>
-    <ul class="runs" id="runs"><li class="empty"><strong>No runs yet</strong>Each finished call appears here, newest first. Open one to read the chat.</li></ul>
+    <p class="note" id="countLine" aria-live="polite"></p>
+    <div id="runs"><p class="empty">No runs yet.</p></div>
+    <div class="pager"><button class="closebtn" id="moreBtn" type="button" hidden>Show more</button></div>
   </section>
 </div>
 
@@ -191,7 +201,8 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
     feed: null,                  // { runs, spent_tokens, cap_tokens, run_count } once loaded
     context: "idle",             // idle | loading | ready | failed
     conversations: null,         // map from conversation id, once ready
-    filter: { cond: "", res: "" },
+    filter: { cond: "", res: "", conv: "", q: "", sort: "newest", group: true },
+    page: 1,
     modal: { open: false, runId: null },
     errorCode: null
   };
@@ -206,7 +217,9 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
       case "CONTEXT_REQUEST": return s.context === "loading" || s.context === "ready" ? s : Object.assign({}, s, { context: "loading" });
       case "CONTEXT_OK": return Object.assign({}, s, { context: "ready", conversations: ev.conversations || {} });
       case "CONTEXT_ERR": return Object.assign({}, s, { context: "failed", conversations: {}, errorCode: ev.code });
-      case "FILTER": return Object.assign({}, s, { filter: Object.assign({}, s.filter, ev.patch) });
+      case "FILTER": return Object.assign({}, s, { filter: Object.assign({}, s.filter, ev.patch), page: 1 });
+      case "PAGE_MORE": return Object.assign({}, s, { page: s.page + 1 });
+      case "RESET_FILTER": return Object.assign({}, s, { filter: Object.assign({}, initial.filter), page: 1 });
       case "OPEN_RUN": return Object.assign({}, s, { modal: { open: true, runId: ev.runId } });
       case "CLOSE_RUN": return Object.assign({}, s, { modal: { open: false, runId: null } });
       default: return s;
@@ -329,138 +342,82 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
     sel.value = current;
   }
 
+  var PAGE_SIZE = 50;
+
   function filteredRuns(s) {
-    return runsOf(s).filter(function (r) {
-      if (s.filter.cond && r.condition !== s.filter.cond) return false;
+    var f = s.filter, q = f.q.trim().toLowerCase();
+    var rows = runsOf(s).filter(function (r) {
+      if (f.cond && r.condition !== f.cond) return false;
+      if (f.conv && r.conversation !== f.conv) return false;
+      if (q && (String(r.run_id).toLowerCase().indexOf(q) < 0 && String(r.conversation).toLowerCase().indexOf(q) < 0)) return false;
       var ok = r.behavior_pass && r.constraint_pass;
-      if (s.filter.res === "pass" && !ok) return false;
-      if (s.filter.res === "fail" && ok) return false;
+      if (f.res === "pass" && !ok) return false;
+      if (f.res === "fail" && ok) return false;
       return true;
-    }).slice(0, 200);
+    });
+    var byTime = function (a, b) { return (a.ts || "").localeCompare(b.ts || "") || String(a.run_id).localeCompare(String(b.run_id)); };
+    if (f.sort === "newest") rows.sort(function (a, b) { return byTime(b, a); });
+    else if (f.sort === "oldest") rows.sort(byTime);
+    else if (f.sort === "tokens") rows.sort(function (a, b) { return (b.input_tokens || 0) - (a.input_tokens || 0); });
+    else rows.sort(function (a, b) { return String(a.conversation).localeCompare(String(b.conversation)) || byTime(b, a); });
+    return rows;
+  }
+
+  function runRow(r) {
+    var li = document.createElement("li"), btn = document.createElement("button");
+    btn.type = "button";
+    var ok = r.behavior_pass && r.constraint_pass;
+    btn.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
+    btn.appendChild(el("span", r.run_id, "id"));
+    btn.appendChild(el("span", fmt(r.input_tokens) + " in · " + fmt(r.cached_tokens || 0) + " cached", "meta"));
+    btn.addEventListener("click", function () { dispatch({ type: "OPEN_RUN", runId: r.run_id }); });
+    li.appendChild(btn);
+    return li;
   }
 
   function renderRuns(s) {
-    var list = document.getElementById("runs");
-    list.textContent = "";
-    var shown = filteredRuns(s);
-    if (!shown.length) {
-      var msg = s.feed ? (runsOf(s).length ? "No runs match these filters." : "No runs yet.") : "Waiting for the first sync.";
-      list.appendChild(el("li", msg, "empty"));
+    var box = document.getElementById("runs"), more = document.getElementById("moreBtn"), count = document.getElementById("countLine");
+    box.textContent = "";
+    var all = filteredRuns(s), total = runsOf(s).length, shown = all.slice(0, s.page * PAGE_SIZE);
+    count.textContent = !s.feed ? "Waiting for the first sync."
+      : "Showing " + shown.length.toLocaleString() + " of " + all.length.toLocaleString() + " matching runs (" + total.toLocaleString() + " total).";
+    more.hidden = shown.length >= all.length;
+    if (!shown.length) { box.appendChild(el("p", s.feed ? "No runs match these filters." : "No runs yet.", "empty")); return; }
+    if (!s.filter.group) {
+      var ul = el("ul", null, "runs");
+      shown.forEach(function (r) { ul.appendChild(runRow(r)); });
+      box.appendChild(ul);
       return;
     }
+    // Group by conversation in first-seen order, so the order of the sort still holds.
+    var order = [], groups = {};
     shown.forEach(function (r) {
-      var li = document.createElement("li"), btn = document.createElement("button");
-      btn.type = "button";
-      var ok = r.behavior_pass && r.constraint_pass;
-      btn.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
-      btn.appendChild(el("span", r.run_id, "id"));
-      btn.appendChild(el("span", fmt(r.input_tokens) + " in · " + fmt(r.cached_tokens || 0) + " cached", "meta"));
-      btn.addEventListener("click", function () { dispatch({ type: "OPEN_RUN", runId: r.run_id }); });
-      li.appendChild(btn); list.appendChild(li);
+      var k = r.conversation || "unlabelled";
+      if (!groups[k]) { groups[k] = []; order.push(k); }
+      groups[k].push(r);
+    });
+    order.forEach(function (k) {
+      var rows = groups[k], pass = rows.filter(function (r) { return r.behavior_pass && r.constraint_pass; }).length;
+      var det = document.createElement("details"), sum = document.createElement("summary");
+      det.className = "group"; det.open = order.length <= 3;
+      sum.appendChild(el("span", k, "gname"));
+      sum.appendChild(el("span", rows.length + " runs · " + pct(pass, rows.length) + " pass", "gmeta"));
+      det.appendChild(sum);
+      var ul = el("ul", null, "runs");
+      rows.forEach(function (r) { ul.appendChild(runRow(r)); });
+      det.appendChild(ul);
+      box.appendChild(det);
     });
   }
 
-  /* ---- Formatted rendering. Untrusted text becomes DOM nodes, never HTML strings. ---- */
-  var HL = (window.hljs) || null;
-
-  function codeBlock(lang, code) {
-    var wrap = el("div", null, "codewrap");
-    var language = (lang || "").trim().toLowerCase();
-    if (language) wrap.appendChild(el("div", language, "code-lang"));
-    var pre = el("pre", null, "code"), c = el("code");
-    c.textContent = code;
-    if (language) c.className = "language-" + language;
-    pre.appendChild(c); wrap.appendChild(pre);
-    if (HL) {
-      try {
-        if (language && HL.getLanguage(language)) HL.highlightElement(c);
-        else HL.highlightElement(c); // auto-detect when no language is given or known
-      } catch (e) { /* leave plain text */ }
-    }
-    return wrap;
-  }
-
-  function inline(text) {
-    // Inline code and bold only. Everything else stays literal text.
-    var frag = document.createDocumentFragment();
-    text.split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/).forEach(function (part) {
-      if (!part) return;
-      if (part.charAt(0) === "`" && part.charAt(part.length - 1) === "`" && part.length > 2) frag.appendChild(el("code", part.slice(1, -1)));
-      else if (part.indexOf("**") === 0 && part.slice(-2) === "**" && part.length > 4) frag.appendChild(el("strong", part.slice(2, -2)));
-      else frag.appendChild(document.createTextNode(part));
-    });
-    return frag;
-  }
-
-  function prose(block) {
-    var lines = block.split("\n"), out = [], list = null;
-    lines.forEach(function (line) {
-      var m = /^(\s*)[-*] (.*)$/.exec(line), h = /^(#{1,3}) (.*)$/.exec(line);
-      if (m) {
-        if (!list) { list = el("ul"); out.push(list); }
-        var li = el("li"); li.appendChild(inline(m[2])); list.appendChild(li);
-        return;
-      }
-      list = null;
-      if (h) { var hd = el(h[1].length === 1 ? "h3" : "h4"); hd.appendChild(inline(h[2])); out.push(hd); return; }
-      if (line.trim() === "") return;
-      var p = el("p"); p.appendChild(inline(line)); out.push(p);
-    });
-    return out;
-  }
-
-  // Fenced code blocks split out first; the rest is paragraphs, lists and headings.
-  function markdown(text) {
-    var root = el("div", null, "md");
-    var parts = String(text == null ? "" : text).split(/```([^\n`]*)\n([\s\S]*?)```/);
-    for (var i = 0; i < parts.length; i++) {
-      if (i % 3 === 0) { prose(parts[i]).forEach(function (n) { root.appendChild(n); }); }
-      else if (i % 3 === 1) { root.appendChild(codeBlock(parts[i], parts[i + 1])); i++; }
-    }
-    if (!root.childNodes.length) root.appendChild(el("p", ""));
-    return root;
-  }
-
-  function toolCard(call) {
-    var card = el("div", null, "toolcard");
-    card.appendChild(el("div", "tool call", "who"));
-    var fn = call.function || {};
-    card.appendChild(el("div", fn.name || call.name || "tool", "tname"));
-    var raw = fn.arguments != null ? fn.arguments : call.arguments;
-    var pretty = raw == null ? "" : raw;
-    try { pretty = JSON.stringify(typeof raw === "string" ? JSON.parse(raw) : raw, null, 2); } catch (e) { pretty = String(raw); }
-    card.appendChild(codeBlock("json", pretty));
-    return card;
-  }
-
-  function toolResultCard(m) {
-    var card = el("div", null, "toolcard");
-    card.appendChild(el("div", "tool result" + (m.tool_call_id ? " · " + m.tool_call_id : ""), "who"));
-    card.appendChild(markdown(m.content));
-    return card;
-  }
-
-  // Long bodies collapse so a long history stays scannable; short ones stay open.
-  function bubble(role, label, body, length) {
-    var box = el("div", null, "msg " + role);
-    box.appendChild(el("div", label, "who"));
-    if (length > 1500) {
-      var d = document.createElement("details"); d.className = "long";
-      d.appendChild(el("summary", "Show " + length.toLocaleString() + " characters"));
-      d.appendChild(body); box.appendChild(d);
-    } else box.appendChild(body);
-    return box;
-  }
-
-  // A message in OpenAI-style shape: role, content, optional tool_calls (assistant) or tool_call_id (tool).
-  function messageNode(m, label) {
-    if (m.role === "tool") return toolResultCard(m);
-    var text = typeof m.content === "string" ? m.content : (m.content == null ? "" : JSON.stringify(m.content));
-    var wrap = el("div");
-    var role = m.role === "assistant" ? "assistant" : m.role === "system" ? "system" : "user";
-    wrap.appendChild(bubble(role, label || m.role, markdown(text), text.length));
-    (m.tool_calls || []).forEach(function (c) { wrap.appendChild(toolCard(c)); });
-    return wrap;
+  // Fill the conversation filter from the data, and keep the chosen values.
+  function syncFilterOptions(s) {
+    var sel = document.getElementById("convFilter"), convs = {};
+    runsOf(s).forEach(function (r) { if (r.conversation) convs[r.conversation] = true; });
+    var keep = s.filter.conv;
+    while (sel.options.length > 1) sel.remove(1);
+    Object.keys(convs).sort().forEach(function (k) { var o = el("option", k); o.value = k; sel.appendChild(o); });
+    sel.value = keep;
   }
 
   function msgBlock(role, label, text) {
@@ -505,6 +462,7 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
     renderLive(s);
     renderSummary(s);
     renderCharts(s);
+    syncFilterOptions(s);
     renderRuns(s);
     renderModal(s);
   }
@@ -512,6 +470,16 @@ details.long > summary { cursor: pointer; color: var(--accent); font-size: 12px;
   /* ---- Wiring: user input becomes events. Nothing here renders. ---- */
   document.getElementById("condFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { cond: e.target.value } }); });
   document.getElementById("resFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { res: e.target.value } }); });
+  document.getElementById("convFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { conv: e.target.value } }); });
+  document.getElementById("sortFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { sort: e.target.value } }); });
+  document.getElementById("groupFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { group: e.target.checked } }); });
+  document.getElementById("qFilter").addEventListener("input", function (e) { dispatch({ type: "FILTER", patch: { q: e.target.value } }); });
+  document.getElementById("moreBtn").addEventListener("click", function () { dispatch({ type: "PAGE_MORE" }); });
+  document.getElementById("resetFilter").addEventListener("click", function () {
+    document.getElementById("qFilter").value = "";
+    document.getElementById("groupFilter").checked = true;
+    dispatch({ type: "RESET_FILTER" });
+  });
   document.getElementById("dlgClose").addEventListener("click", function () { dispatch({ type: "CLOSE_RUN" }); });
   var dlgEl = document.getElementById("inspector");
   dlgEl.addEventListener("click", function (e) { if (e.target === dlgEl) dispatch({ type: "CLOSE_RUN" }); });
