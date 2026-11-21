@@ -40,3 +40,5 @@
 2026-11-21T08:02:37Z done v2-keep_last_k-binary_search-r2 beh=True dec=False prompt=312 [39/108] spent=343955
 2026-11-21T08:02:41Z done v2-keep_last_k-chunk_list-r0 beh=False dec=False prompt=312 [40/108] spent=344324
 2026-11-21T08:02:43Z done v2-keep_last_k-chunk_list-r1 beh=False dec=False prompt=312 [41/108] spent=344693
+2026-11-21T08:03:47Z done v2-keep_last_k-chunk_list-r2 beh=False dec=False prompt=312 [42/108] spent=345062
+2026-11-21T08:03:55Z done v2-keep_last_k-count_vowels-r0 beh=True dec=False prompt=302 [43/108] spent=345421

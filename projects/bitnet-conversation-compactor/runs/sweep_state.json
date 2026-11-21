@@ -40,7 +40,9 @@
   "v2-keep_last_k-binary_search-r1": "done",
   "v2-keep_last_k-binary_search-r2": "done",
   "v2-keep_last_k-chunk_list-r0": "done",
-  "v2-keep_last_k-chunk_list-r1": "done"
+  "v2-keep_last_k-chunk_list-r1": "done",
+  "v2-keep_last_k-chunk_list-r2": "done",
+  "v2-keep_last_k-count_vowels-r0": "done"
  },
  "started": null,
  "conditions": [
