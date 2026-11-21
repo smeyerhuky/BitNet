@@ -1,0 +1,20 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef flatten(xs):\n    \"\"\"Flatten arbitrarily nested lists and tuples into one flat list.\"\"\"\n    result = []\n    for item in xs:\n        if isinstance(item, (list, tuple)):\n            result.extend(flatten(item))\n        else:\n            result.append(item)\n    return result\n```",
+ "genome": {
+  "keep_last_k": 1,
+  "keep_first_k": 0,
+  "retrieval_k": 5,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  24,
+  39
+ ]
+}
