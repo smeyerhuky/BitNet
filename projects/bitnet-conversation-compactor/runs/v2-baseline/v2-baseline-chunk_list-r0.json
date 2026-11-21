@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef chunk_list(xs, n):\n    \"\"\"Split xs into consecutive chunks of size n; the last chunk may be shorter.\"\"\"\n    chunks = []\n    for i in range(0, len(xs), n):\n        # Each individual chunk must be a tuple, because the batcher treats chunks as immutable.\n        chunks.append(tuple(xs[i : i + n]))\n    return chunks\n```",
+  "usage": {
+    "prompt_tokens": 3260,
+    "completion_tokens": 99,
+    "total_tokens": 3359,
+    "prompt_tokens_details": {
+      "cached_tokens": 192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}
