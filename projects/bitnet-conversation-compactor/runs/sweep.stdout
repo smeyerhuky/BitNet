@@ -1,0 +1,6 @@
+2026-11-21T07:54:06Z plan: 108 runs, 0 already done, 108 to do
+2026-11-21T07:54:13Z done v2-retrieval-binary_search-r0 beh=True dec=True prompt=354 [1/108] spent=324601
+2026-11-21T07:54:24Z done v2-retrieval-binary_search-r1 beh=True dec=True prompt=354 [2/108] spent=325109
+2026-11-21T07:54:34Z done v2-retrieval-binary_search-r2 beh=True dec=True prompt=354 [3/108] spent=325617
+2026-11-21T07:54:42Z done v2-retrieval-chunk_list-r0 beh=True dec=True prompt=461 [4/108] spent=326217
+2026-11-21T07:54:44Z done v2-retrieval-chunk_list-r1 beh=True dec=True prompt=461 [5/108] spent=326737

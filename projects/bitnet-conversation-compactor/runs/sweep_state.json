@@ -1,0 +1,15 @@
+{
+ "runs": {
+  "v2-retrieval-binary_search-r0": "done",
+  "v2-retrieval-binary_search-r1": "done",
+  "v2-retrieval-binary_search-r2": "done",
+  "v2-retrieval-chunk_list-r0": "done",
+  "v2-retrieval-chunk_list-r1": "done"
+ },
+ "started": null,
+ "conditions": [
+  "retrieval",
+  "keep_last_k",
+  "structural"
+ ]
+}
