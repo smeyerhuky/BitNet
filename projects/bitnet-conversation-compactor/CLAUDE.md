@@ -18,15 +18,9 @@ Question: can a BitNet model, run as an internal compression layer inside our AP
 ## Status (2026-11-21)
 
 - Corpus v2 floor sweep complete: 108 runs. Retrieval passes all 36 at 373 prompt tokens; keep-last-2 and structural lose the planted decision.
-- Run-watch page live, with analytics, filters and chat inspector. Store at feed version 7 (252 runs).
-- Nested publisher written, but print-mode writes to the store are denied (see below). The store is synced from the session, not from the sweep.
-- GAN search loop (spec v0.3) is not built. The full run waits on it.
-
-## Store access (blocker)
-
-- Reads work in print mode. Writes through `ArtifactData set` are denied in `claude -p`, even with `--settings` pointing at `~/.claude/auto-settings.json` and `--allowedTools ArtifactData`.
-- Interactive sessions write without a prompt, because this folder's `.claude/settings.local.json` pre-approves `ArtifactData`. That file is git-ignored.
-- Options: approve in an interactive session, or allow bypassed permissions for the publisher (needs an explicit decision).
+- Run-watch page live. Store at feed version 8, synced by the session with ArtifactData after each checkpoint (no print-mode publishing).
+- GAN search (spec v0.3) implemented in `src/gan.py`. Single-room end-to-end check passed: one candidate, one conversation, scored, recorded, shown in the feed.
+- Adversarial variants built (`corpus/build_adv.py`): `merge_intervals_adv` (search), `chunk_list_adv` (test).
 
 ## Rules
 

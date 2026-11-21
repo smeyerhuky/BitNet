@@ -21,8 +21,8 @@ Decisions made 2026-11-21, after a Sonnet review of the parameters (see the jour
 - **Search (6):** reverse_words, merge_intervals, slugify, flatten, roman_to_int, binary_search.
 - **Selection (3):** is_palindrome, parse_duration, running_mean.
 - **Test (3), touched once at the end:** chunk_list, dedupe_keep_order, count_vowels.
-- **Provisional.** Before launch, check which conversations the retrieval floor fails on, across all 12. If a set has no retrieval-floor failure, swap one conversation in from another set so that each of search and selection has at least one. Record the final split here before the run.
-- **Adversarial variants:** if the retrieval floor passes all 12, build two variants whose decision turn has no word overlap with the request. Put one in search and one in test.
+- **Final (2026-11-21).** The retrieval floor passed all 12, so the adversarial rule applies. Search: reverse_words, merge_intervals_adv, slugify, flatten, roman_to_int, binary_search. Selection: is_palindrome, parse_duration, running_mean. Test: chunk_list_adv, dedupe_keep_order, count_vowels. The originals of merge_intervals and chunk_list stay in the sweep record.
+- **Adversarial variants:** `merge_intervals_adv` and `chunk_list_adv`, built by `corpus/build_adv.py`. Their decision text shares no content word with the request.
 
 ## 2. Population and elitism
 
