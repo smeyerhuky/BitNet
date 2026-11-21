@@ -91,7 +91,21 @@
   "v2-structural-is_palindrome-r1": "done",
   "v2-structural-is_palindrome-r2": "done",
   "v2-structural-merge_intervals-r0": "done",
-  "v2-structural-merge_intervals-r1": "done"
+  "v2-structural-merge_intervals-r1": "done",
+  "v2-structural-merge_intervals-r2": "done",
+  "v2-structural-parse_duration-r0": "done",
+  "v2-structural-parse_duration-r1": "done",
+  "v2-structural-parse_duration-r2": "done",
+  "v2-structural-reverse_words-r0": "done",
+  "v2-structural-reverse_words-r1": "done",
+  "v2-structural-reverse_words-r2": "done",
+  "v2-structural-roman_to_int-r0": "done",
+  "v2-structural-roman_to_int-r1": "done",
+  "v2-structural-roman_to_int-r2": "done",
+  "v2-structural-running_mean-r0": "done",
+  "v2-structural-running_mean-r1": "done",
+  "v2-structural-running_mean-r2": "done",
+  "v2-structural-slugify-r0": "done"
  },
  "started": null,
  "conditions": [

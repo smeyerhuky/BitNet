@@ -91,3 +91,17 @@
 2026-11-21T08:08:46Z done v2-structural-is_palindrome-r2 beh=False dec=False prompt=185 [90/108] spent=361971
 2026-11-21T08:08:50Z done v2-structural-merge_intervals-r0 beh=False dec=False prompt=186 [91/108] spent=362337
 2026-11-21T08:08:56Z done v2-structural-merge_intervals-r1 beh=False dec=False prompt=186 [92/108] spent=362661
+2026-11-21T08:09:17Z done v2-structural-merge_intervals-r2 beh=False dec=False prompt=186 [93/108] spent=362986
+2026-11-21T08:09:26Z done v2-structural-parse_duration-r0 beh=True dec=False prompt=194 [94/108] spent=363327
+2026-11-21T08:09:32Z done v2-structural-parse_duration-r1 beh=True dec=False prompt=194 [95/108] spent=363722
+2026-11-21T08:09:36Z done v2-structural-parse_duration-r2 beh=True dec=False prompt=194 [96/108] spent=364062
+2026-11-21T08:09:38Z done v2-structural-reverse_words-r0 beh=False dec=False prompt=180 [97/108] spent=364291
+2026-11-21T08:09:40Z done v2-structural-reverse_words-r1 beh=False dec=False prompt=180 [98/108] spent=364520
+2026-11-21T08:09:43Z done v2-structural-reverse_words-r2 beh=False dec=False prompt=180 [99/108] spent=364749
+2026-11-21T08:09:56Z done v2-structural-roman_to_int-r0 beh=True dec=False prompt=188 [100/108] spent=365114
+2026-11-21T08:10:05Z done v2-structural-roman_to_int-r1 beh=True dec=False prompt=188 [101/108] spent=365479
+2026-11-21T08:10:24Z done v2-structural-roman_to_int-r2 beh=True dec=False prompt=188 [102/108] spent=365845
+2026-11-21T08:10:30Z done v2-structural-running_mean-r0 beh=True dec=False prompt=183 [103/108] spent=366113
+2026-11-21T08:10:46Z done v2-structural-running_mean-r1 beh=True dec=False prompt=183 [104/108] spent=366381
+2026-11-21T08:10:54Z done v2-structural-running_mean-r2 beh=True dec=False prompt=183 [105/108] spent=366649
+2026-11-21T08:11:04Z done v2-structural-slugify-r0 beh=False dec=False prompt=192 [106/108] spent=366928
