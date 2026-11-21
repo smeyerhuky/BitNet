@@ -6,7 +6,7 @@ single run above the per-run limit. State lives in runs/budget.json.
 import json
 import pathlib
 
-PHASE_CAP_TOKENS = 10_000_000  # raised from 2M by owner; local ledger only, not a provider quota
+PHASE_CAP_TOKENS = 100_000_000  # local ledger only, not a provider quota; raised by owner, to be revisited on rate or quota limits
 HALT_FRACTION = 0.8
 PER_RUN_LIMIT = 50_000  # unchanged
 
