@@ -1,0 +1,21 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef is_palindrome(s):\n    \"\"\"Check if s is a palindrome, ignoring digits and case.\"\"\"\n    filtered = [char.lower() for char in s if char.isalpha()]\n    return filtered == filtered[::-1]\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 6,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  24,
+  36,
+  39
+ ]
+}

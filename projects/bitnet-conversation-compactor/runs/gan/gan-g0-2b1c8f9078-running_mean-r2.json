@@ -1,0 +1,23 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef running_mean(xs):\n    \"\"\"Return the running mean of xs rounded to 2 decimals.\"\"\"\n    means = []\n    current_sum = 0.0\n    for i, x in enumerate(xs, 1):\n        current_sum += x\n        means.append(round(current_sum / i, 2))\n    return means\n```",
+ "genome": {
+  "keep_last_k": 2,
+  "keep_first_k": 1,
+  "retrieval_k": 5,
+  "cos_threshold": 0.21,
+  "keep_set": [
+   38
+  ],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  24,
+  38,
+  39
+ ]
+}
