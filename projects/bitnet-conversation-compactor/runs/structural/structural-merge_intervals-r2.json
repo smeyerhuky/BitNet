@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef merge_intervals(intervals):\n    \"\"\"Merge overlapping and touching intervals.\"\"\"\n    if not intervals:\n        return []\n\n    # Sort by start time to ensure linear processing\n    sorted_intervals = sorted(intervals, key=lambda x: x[0])\n    merged = []\n    \n    current_start, current_end = sorted_intervals[0]\n\n    for next_start, next_end in sorted_intervals[1:]:\n        # If the next interval starts before or exactly when the current one ends, merge\n        if next_start <= current_end:\n            current_end = max(current_end, next_end)\n        else:\n            merged.append([current_start, current_end])\n            current_start, current_end = next_start, next_end\n\n    merged.append([current_start, current_end])\n    return merged\n```",
+  "usage": {
+    "prompt_tokens": 219,
+    "completion_tokens": 205,
+    "total_tokens": 424,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: case is folded before comparing, so 'Ab' is not a palindrome.\ndef is_palindrome(s):\n    \"\"\"Check if s is a palindrome, ignoring case and non-alphanumeric characters.\"\"\"\n    cleaned = [char.lower() for char in s if char.isalnum()]\n    return cleaned == cleaned[::-1]\n```",
+  "usage": {
+    "prompt_tokens": 341,
+    "completion_tokens": 85,
+    "total_tokens": 426,
+    "prompt_tokens_details": {
+      "cached_tokens": 224
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

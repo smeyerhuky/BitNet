@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef reverse_words(s: str) -> str:\n    \"\"\"Return the words of s in reverse order, joined by single spaces.\"\"\"\n    # split() without arguments collapses all whitespace and removes leading/trailing spaces\n    words = s.split()\n    return \" \".join(reversed(words))\n\n# CONSTRAINT: whitespace-only input returns an empty string.\n```",
+  "usage": {
+    "prompt_tokens": 203,
+    "completion_tokens": 88,
+    "total_tokens": 291,
+    "prompt_tokens_details": {
+      "cached_tokens": 96
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

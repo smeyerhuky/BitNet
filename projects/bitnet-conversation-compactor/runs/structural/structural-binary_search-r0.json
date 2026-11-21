@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef binary_search(xs, target):\n    \"\"\"Return an index of target in sorted list xs, or -1 if absent.\"\"\"\n    low = 0\n    high = len(xs) - 1\n\n    while low <= high:\n        mid = (low + high) // 2\n        if xs[mid] == target:\n            return mid\n        elif xs[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n\n    return -1\n```",
+  "usage": {
+    "prompt_tokens": 204,
+    "completion_tokens": 124,
+    "total_tokens": 328,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

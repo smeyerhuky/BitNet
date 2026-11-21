@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef is_palindrome(s: str) -> bool:\n    \"\"\"Return True if s reads the same forwards and backwards, ignoring case and non-alphanumeric characters.\"\"\"\n    # Filter out non-alphanumeric characters and fold case\n    cleaned = \"\".join(char.lower() for char in s if char.isalnum())\n    return cleaned == cleaned[::-1]\n```",
+  "usage": {
+    "prompt_tokens": 211,
+    "completion_tokens": 91,
+    "total_tokens": 302,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: y is not a vowel.\n\ndef count_vowels(s: str) -> int:\n    \"\"\"Count the vowels a, e, i, o, u in s, ignoring case.\"\"\"\n    vowels = set(\"aeiouAEIOU\")\n    return sum(1 for char in s if char in vowels)\n```",
+  "usage": {
+    "prompt_tokens": 201,
+    "completion_tokens": 83,
+    "total_tokens": 284,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

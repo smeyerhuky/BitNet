@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef roman_to_int(s: str) -> int:\n    \"\"\"Convert a Roman numeral string to an integer.\"\"\"\n    roman_map = {\n        'I': 1,\n        'V': 5,\n        'X': 10,\n        'L': 50,\n        'C': 100,\n        'D': 500,\n        'M': 1000\n    }\n    total = 0\n    prev_value = 0\n    # Process from right to left to easily handle subtractive pairs\n    for char in reversed(s):\n        value = roman_map[char]\n        if value < prev_value:\n            total -= value\n        else:\n            total += value\n        prev_value = value\n    return total\n\n# CONSTRAINT: subtractive pairs use the value of the smaller left symbol, as in IV = 4.\n```",
+  "usage": {
+    "prompt_tokens": 231,
+    "completion_tokens": 215,
+    "total_tokens": 446,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}
