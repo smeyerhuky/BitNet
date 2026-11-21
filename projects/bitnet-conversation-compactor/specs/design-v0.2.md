@@ -76,13 +76,15 @@ Adversarial policy-gradient training against a retrained discriminator is droppe
 - If the P2 A/A study is not reproducible, or judge alpha is below 0.6, judge-based claims are dropped and only the deterministic and fidelity metrics count.
 - If the P5 selector cannot beat the best floor on the selection split after one full pass, stop and report.
 
-## 8. Open decisions for the owner
+## 8. Decisions (made 2026-11-21; owner delegated them)
 
-1. Non-inferiority margin (proposed 5 points).
-2. Coding-only domain for the first phase (proposed yes).
-3. Judge families available beyond Gemma.
-4. Whether a windowed BitNet selector is acceptable, or a longer-context selector should be used for the rewrite role.
-5. Spend cap and stop-loss for NVIDIA and upstream calls.
+Checked against the NVIDIA endpoint: logprobs are supported; the model list includes `mistralai/mistral-large-4-1t-a52b` (a different family from Gemma); Gemma-4-31B was consulted on the margin and judge choice.
+
+1. **Non-inferiority margin: 5 points** on equivalence rate, confirmatory and pre-registered. Rule: if the A/A study shows discordance above 5 points, widen the margin to twice the observed A/A discordance and record the change in the journal. Gemma's view: 5 points is the right default for a compressed context that must preserve constraints. It also warned that a noisy baseline can cause false failures, which the A/A rule covers.
+2. **Domain: coding only** for P0 to P6, with unit tests as the ground truth. A second domain (multi-turn chat) is added only for the P7 transfer check.
+3. **Judges:** primary is `google/gemma-4-31b-it`. The cross-family confirmation judge is `mistralai/mistral-large-4-1t-a52b`. A claim is confirmed only if both judges agree on the test split. Fidelity `F` uses endpoint logprobs, so it needs no judge. No other provider keys are requested until P7.
+4. **Selector role:** BitNet runs windowed (4096-token chunks) and scores spans to keep or drop. It never writes the compressed context directly. The rewrite role, if used at all, stays with a longer-context model.
+5. **Spend cap:** a self-set limit of 2,000,000 NVIDIA tokens (input plus output) for P0 to P3. Stop-loss: halt and report if a phase reaches 80% of its cap, or if any single run exceeds 50,000 tokens. The endpoint's actual billing is not visible from here, so these limits are counted in tokens, not dollars, and the owner can change them.
 
 ## 9. Logging
 
