@@ -1,0 +1,21 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef parse_duration(s):\n    \"\"\"Parse duration string (e.g. '1h30m15s') to float seconds.\"\"\"\n    pattern = r'(?:(?P<hours>\\d+)h)?(?:(?P<minutes>\\d+)m)?(?:(?P<seconds>\\d+)s)?'\n    match = re.fullmatch(pattern, s)\n    if not match:\n        raise ValueError(f\"Invalid duration format: {s}\")\n    \n    parts = match.groupdict()\n    total = 0.0\n    if parts['hours']:\n        total += float(parts['hours']) * 3600\n    if parts['minutes']:\n        total += float(parts['minutes']) * 60\n    if parts['seconds']:\n        total += float(parts['seconds'])\n        \n    return total\n```",
+ "genome": {
+  "keep_last_k": 0,
+  "keep_first_k": 0,
+  "retrieval_k": 6,
+  "cos_threshold": 0.0,
+  "keep_set": [],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  24,
+  36,
+  39
+ ]
+}
