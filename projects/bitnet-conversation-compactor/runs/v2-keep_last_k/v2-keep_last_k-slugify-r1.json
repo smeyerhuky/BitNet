@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef slugify(title):\n    \"\"\"Convert a title to a slug.\"\"\"\n    # Lowercase and replace non-alphanumeric characters with hyphens\n    slug = re.sub(r'[^a-z0-9]+', '-', title.lower())\n    # Strip leading/trailing hyphens\n    return slug.strip('-')\n```",
+  "usage": {
+    "prompt_tokens": 313,
+    "completion_tokens": 87,
+    "total_tokens": 400,
+    "prompt_tokens_details": {
+      "cached_tokens": 192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": false,
+    "constraint_pass": false,
+    "detail": "AssertionError"
+  }
+}

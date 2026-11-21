@@ -68,7 +68,14 @@
   "v2-keep_last_k-roman_to_int-r2": "done",
   "v2-keep_last_k-running_mean-r0": "done",
   "v2-keep_last_k-running_mean-r1": "done",
-  "v2-keep_last_k-running_mean-r2": "done"
+  "v2-keep_last_k-running_mean-r2": "done",
+  "v2-keep_last_k-slugify-r0": "done",
+  "v2-keep_last_k-slugify-r1": "done",
+  "v2-keep_last_k-slugify-r2": "done",
+  "v2-structural-binary_search-r0": "done",
+  "v2-structural-binary_search-r1": "done",
+  "v2-structural-binary_search-r2": "done",
+  "v2-structural-chunk_list-r0": "done"
  },
  "started": null,
  "conditions": [

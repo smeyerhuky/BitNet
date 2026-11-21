@@ -68,3 +68,10 @@
 2026-11-21T08:06:40Z done v2-keep_last_k-running_mean-r0 beh=True dec=False prompt=304 [67/108] spent=355321
 2026-11-21T08:06:44Z done v2-keep_last_k-running_mean-r1 beh=True dec=False prompt=304 [68/108] spent=355710
 2026-11-21T08:06:48Z done v2-keep_last_k-running_mean-r2 beh=True dec=False prompt=304 [69/108] spent=356099
+2026-11-21T08:07:01Z done v2-keep_last_k-slugify-r0 beh=False dec=False prompt=313 [70/108] spent=356499
+2026-11-21T08:07:07Z done v2-keep_last_k-slugify-r1 beh=False dec=False prompt=313 [71/108] spent=356899
+2026-11-21T08:07:09Z done v2-keep_last_k-slugify-r2 beh=False dec=False prompt=313 [72/108] spent=357299
+2026-11-21T08:07:15Z done v2-structural-binary_search-r0 beh=True dec=False prompt=191 [73/108] spent=357614
+2026-11-21T08:07:22Z done v2-structural-binary_search-r1 beh=True dec=False prompt=191 [74/108] spent=357929
+2026-11-21T08:07:26Z done v2-structural-binary_search-r2 beh=True dec=False prompt=191 [75/108] spent=358244
+2026-11-21T08:07:30Z done v2-structural-chunk_list-r0 beh=False dec=False prompt=191 [76/108] spent=358492
