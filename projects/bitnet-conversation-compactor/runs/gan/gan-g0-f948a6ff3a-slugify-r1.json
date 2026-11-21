@@ -1,0 +1,28 @@
+{
+ "reply": "```python\n\"\"\"Helper utilities.\"\"\"\nimport re\n\ndef slugify(title):\n    \"\"\"Convert a title to a slug.\"\"\"\n    # Lowercase and replace non-alphanumeric characters with underscores\n    slug = re.sub(r'[^a-z0-9]+', '_', title.lower())\n    # Strip leading/trailing underscores\n    return slug.strip('_')\n```",
+ "genome": {
+  "keep_last_k": 5,
+  "keep_first_k": 0,
+  "retrieval_k": 5,
+  "cos_threshold": 0.313,
+  "keep_set": [
+   1,
+   12,
+   13
+  ],
+  "tools_keep": false,
+  "files_keep": true,
+  "notes_keep": true
+ },
+ "kept": [
+  0,
+  1,
+  12,
+  13,
+  35,
+  36,
+  37,
+  38,
+  39
+ ]
+}
