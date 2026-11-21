@@ -148,102 +148,179 @@ dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
 
 <script>
 (function () {
-  var CONDS = ["baseline", "keep_last_k", "structural", "v2-baseline", "retrieval"];
-  var LABEL = { "baseline": "Baseline", "keep_last_k": "Keep last 2", "structural": "Structural", "v2-baseline": "Baseline (v2)", "retrieval": "Retrieval" };
-  var runs = [], context = null, contextLoading = false, db = null, gotData = false, timer = null;
-  var dot = document.getElementById("dot"), liveText = document.getElementById("liveText"),
-      connNote = document.getElementById("connNote"), dlg = document.getElementById("inspector");
+  /* ---- State machine ----------------------------------------------------------
+     state is the only source of truth. Events go through reduce(); effects (the store
+     subscription and the context read) start when the reducer asks for them; every
+     render function is presentational: it reads state and writes the DOM, nothing else. */
 
+  var CONDS = ["baseline", "keep_last_k", "structural", "v2-baseline", "retrieval"];
+  var LABEL = { "baseline": "Baseline", "keep_last_k": "Keep last 2", "structural": "Structural",
+                "v2-baseline": "Baseline (v2)", "retrieval": "Retrieval" };
+  var STALE_MS = 10000;
+
+  var initial = {
+    conn: "connecting",          // connecting | live | error | unavailable
+    stale: false,                // true after 10 s with no confirmed snapshot
+    feed: null,                  // { runs, spent_tokens, cap_tokens, run_count } once loaded
+    context: "idle",             // idle | loading | ready | failed
+    conversations: null,         // map from conversation id, once ready
+    filter: { cond: "", res: "" },
+    modal: { open: false, runId: null },
+    errorCode: null
+  };
+
+  /* ---- Reducer: (state, event) -> state. Pure. ---- */
+  function reduce(s, ev) {
+    switch (ev.type) {
+      case "UNAVAILABLE": return Object.assign({}, s, { conn: "unavailable" });
+      case "STALE": return Object.assign({}, s, { stale: true });
+      case "FEED": return Object.assign({}, s, { conn: "live", stale: ev.fromCache ? s.stale : false, feed: ev.feed, errorCode: null });
+      case "FEED_ERROR": return Object.assign({}, s, { conn: "error", errorCode: ev.code });
+      case "CONTEXT_REQUEST": return s.context === "loading" || s.context === "ready" ? s : Object.assign({}, s, { context: "loading" });
+      case "CONTEXT_OK": return Object.assign({}, s, { context: "ready", conversations: ev.conversations || {} });
+      case "CONTEXT_ERR": return Object.assign({}, s, { context: "failed", conversations: {}, errorCode: ev.code });
+      case "FILTER": return Object.assign({}, s, { filter: Object.assign({}, s.filter, ev.patch) });
+      case "OPEN_RUN": return Object.assign({}, s, { modal: { open: true, runId: ev.runId } });
+      case "CLOSE_RUN": return Object.assign({}, s, { modal: { open: false, runId: null } });
+      default: return s;
+    }
+  }
+
+  var state = initial;
+  var db = null;
+  function dispatch(ev) {
+    var before = state;
+    state = reduce(state, ev);
+    render(state, before);
+    effects(state, before);
+  }
+
+  /* ---- Effects: the only place that touches the store or timers. ---- */
+  function effects(s, before) {
+    if (s.context === "loading" && before.context !== "loading" && db) {
+      db.doc("context/v2").get().then(function (snap) {
+        dispatch({ type: "CONTEXT_OK", conversations: snap.exists ? (snap.data().conversations || {}) : {} });
+      }, function (e) { dispatch({ type: "CONTEXT_ERR", code: e && e.code ? e.code : "unknown" }); });
+    }
+  }
+
+  /* ---- Presentational renderers: state in, DOM out. ---- */
   function pct(n, d) { return d ? Math.round(100 * n / d) + "%" : "–"; }
   function fmt(n) { return n == null ? "–" : Number(n).toLocaleString(); }
   function el(tag, text, cls) { var e = document.createElement(tag); if (cls) e.className = cls; e.textContent = text == null ? "" : String(text); return e; }
   function colorOf(c) { return "var(--c-" + (CONDS.indexOf(c) >= 0 ? c : "baseline") + ")"; }
   function condLabel(c) { return LABEL[c] || c || "unlabelled"; }
-  function setLive(on, text) { dot.className = "dot" + (on ? " on" : ""); liveText.textContent = text; }
+  function runsOf(s) { return s.feed ? s.feed.runs || [] : []; }
 
-  function groupStats() {
+  function groupStats(runs) {
     var g = {};
     runs.forEach(function (r) {
       var k = r.condition || "unlabelled";
-      var s = g[k] = g[k] || { n: 0, beh: 0, dec: 0, prompt: 0, cached: 0 };
-      s.n++; s.beh += r.behavior_pass ? 1 : 0; s.dec += r.constraint_pass ? 1 : 0;
-      s.prompt += r.input_tokens || 0; s.cached += r.cached_tokens || 0;
+      var x = g[k] = g[k] || { n: 0, beh: 0, dec: 0, prompt: 0, cached: 0 };
+      x.n++; x.beh += r.behavior_pass ? 1 : 0; x.dec += r.constraint_pass ? 1 : 0;
+      x.prompt += r.input_tokens || 0; x.cached += r.cached_tokens || 0;
     });
     return g;
   }
 
-  function renderSummary() {
-    var n = runs.length, beh = runs.filter(function (r) { return r.behavior_pass; }).length,
-        dec = runs.filter(function (r) { return r.constraint_pass; }).length,
-        prompt = runs.reduce(function (s, r) { return s + (r.input_tokens || 0); }, 0),
-        cached = runs.reduce(function (s, r) { return s + (r.cached_tokens || 0); }, 0);
+  function renderLive(s) {
+    var dot = document.getElementById("dot"), text = document.getElementById("liveText");
+    var connNote = document.getElementById("connNote");
+    connNote.hidden = !(s.stale && s.conn !== "live");
+    if (s.conn === "unavailable") { dot.className = "dot"; text.textContent = "Live store unavailable in this view"; return; }
+    if (s.conn === "error") { dot.className = "dot"; text.textContent = "Store error: " + (s.errorCode || "unknown"); return; }
+    if (s.conn === "connecting") { dot.className = "dot"; text.textContent = "Connecting to the run store"; return; }
+    dot.className = "dot on";
+    text.textContent = "Live · " + ((s.feed && (s.feed.run_count || runsOf(s).length)) || 0) + " runs";
+  }
+
+  function renderSummary(s) {
+    var runs = runsOf(s), n = runs.length;
+    var beh = runs.filter(function (r) { return r.behavior_pass; }).length;
+    var dec = runs.filter(function (r) { return r.constraint_pass; }).length;
+    var prompt = runs.reduce(function (a, r) { return a + (r.input_tokens || 0); }, 0);
+    var cached = runs.reduce(function (a, r) { return a + (r.cached_tokens || 0); }, 0);
     document.getElementById("nRuns").textContent = n;
     document.getElementById("pBeh").textContent = pct(beh, n);
     document.getElementById("pDec").textContent = pct(dec, n);
     document.getElementById("mPrompt").textContent = n ? fmt(Math.round(prompt / n)) : "–";
     document.getElementById("cShare").textContent = pct(cached, prompt);
+    var f = s.feed || {};
+    var cap = f.cap_tokens || 0, spent = f.spent_tokens || 0;
+    document.getElementById("budgetBar").style.width = (cap ? Math.min(100, 100 * spent / cap) : 0).toFixed(2) + "%";
+    document.getElementById("budgetText").textContent = s.feed
+      ? fmt(spent) + " of " + fmt(cap) + " tokens on the local ledger (not a provider quota)"
+      : "Ledger not yet reported.";
   }
 
   function bar(container, name, cond, value, max, label) {
-    var row = el("div", null, "row");
-    var nm = el("div", null, "name");
+    var row = el("div", null, "row"), nm = el("div", null, "name");
     var sw = el("span", null, "swatch"); sw.style.background = colorOf(cond);
     nm.appendChild(sw); nm.appendChild(el("span", name));
-    var track = el("div", null, "track");
-    var fill = el("span"); fill.style.width = (max ? Math.max(0, Math.min(100, 100 * value / max)) : 0).toFixed(1) + "%";
+    var track = el("div", null, "track"), fill = el("span");
+    fill.style.width = (max ? Math.max(0, Math.min(100, 100 * value / max)) : 0).toFixed(1) + "%";
     fill.style.background = colorOf(cond); track.appendChild(fill);
     row.appendChild(nm); row.appendChild(track); row.appendChild(el("div", label, "val"));
     container.appendChild(row);
   }
 
-  function renderCharts() {
-    var g = groupStats(), keys = CONDS.filter(function (c) { return g[c]; });
-    Object.keys(g).forEach(function (c) { if (keys.indexOf(c) < 0) keys.push(c); });
-    var box = document.getElementById("charts"), table = document.getElementById("byCond");
-    if (!keys.length) return;
+  function renderCharts(s) {
+    var runs = runsOf(s), box = document.getElementById("charts"), table = document.getElementById("byCond");
+    var sel = document.getElementById("condFilter");
     box.textContent = ""; table.textContent = "";
-    var metrics = [
-      { title: "Behavior pass rate", fn: function (s) { return s.beh / s.n; }, lab: function (s) { return pct(s.beh, s.n); }, max: 1 },
-      { title: "Decision pass rate", fn: function (s) { return s.dec / s.n; }, lab: function (s) { return pct(s.dec, s.n); }, max: 1 },
-      { title: "Mean prompt tokens", fn: function (s) { return s.prompt / s.n; }, lab: function (s) { return fmt(Math.round(s.prompt / s.n)); }, max: null },
-      { title: "Cached share of prompt", fn: function (s) { return s.prompt ? s.cached / s.prompt : 0; }, lab: function (s) { return pct(s.cached, s.prompt); }, max: 1 }
-    ];
+    if (!runs.length) {
+      box.appendChild(el("div", null, "empty")).appendChild(el("strong", "No runs yet"));
+      return;
+    }
+    var g = groupStats(runs), keys = CONDS.filter(function (c) { return g[c]; });
+    Object.keys(g).forEach(function (c) { if (keys.indexOf(c) < 0) keys.push(c); });
     var maxPrompt = Math.max.apply(null, keys.map(function (k) { return g[k].prompt / g[k].n; }));
+    var metrics = [
+      { title: "Behavior pass rate", v: function (x) { return x.beh / x.n; }, l: function (x) { return pct(x.beh, x.n); }, max: 1 },
+      { title: "Decision pass rate", v: function (x) { return x.dec / x.n; }, l: function (x) { return pct(x.dec, x.n); }, max: 1 },
+      { title: "Mean prompt tokens", v: function (x) { return x.prompt / x.n; }, l: function (x) { return fmt(Math.round(x.prompt / x.n)); }, max: maxPrompt },
+      { title: "Cached share of prompt", v: function (x) { return x.prompt ? x.cached / x.prompt : 0; }, l: function (x) { return pct(x.cached, x.prompt); }, max: 1 }
+    ];
     metrics.forEach(function (m) {
       box.appendChild(el("div", m.title, "metric"));
-      keys.forEach(function (k) {
-        var s = g[k], mx = m.max == null ? maxPrompt : m.max;
-        bar(box, condLabel(k), k, m.fn(s), mx, m.lab(s));
-      });
+      keys.forEach(function (k) { bar(box, condLabel(k), k, m.v(g[k]), m.max, m.l(g[k])); });
     });
     var t = document.createElement("table"), head = document.createElement("tr");
     ["Condition", "Runs", "Behavior", "Decision", "Mean prompt", "Cached"].forEach(function (h) { head.appendChild(el("th", h)); });
     t.appendChild(head);
     keys.forEach(function (k) {
-      var s = g[k], tr = document.createElement("tr");
-      [condLabel(k), s.n, pct(s.beh, s.n), pct(s.dec, s.n), fmt(Math.round(s.prompt / s.n)), pct(s.cached, s.prompt)]
+      var x = g[k], tr = document.createElement("tr");
+      [condLabel(k), x.n, pct(x.beh, x.n), pct(x.dec, x.n), fmt(Math.round(x.prompt / x.n)), pct(x.cached, x.prompt)]
         .forEach(function (v) { tr.appendChild(el("td", v)); });
       t.appendChild(tr);
     });
     table.appendChild(t);
-    var sel = document.getElementById("condFilter"), current = sel.value;
+    // Keep the condition filter's options in step with the data; keep the current choice.
+    var current = s.filter.cond;
     while (sel.options.length > 1) sel.remove(1);
     keys.forEach(function (k) { var o = el("option", condLabel(k)); o.value = k; sel.appendChild(o); });
     sel.value = current;
   }
 
-  function renderRuns() {
-    var cond = document.getElementById("condFilter").value, res = document.getElementById("resFilter").value;
-    var list = document.getElementById("runs");
-    list.textContent = "";
-    var shown = runs.filter(function (r) {
-      if (cond && r.condition !== cond) return false;
+  function filteredRuns(s) {
+    return runsOf(s).filter(function (r) {
+      if (s.filter.cond && r.condition !== s.filter.cond) return false;
       var ok = r.behavior_pass && r.constraint_pass;
-      if (res === "pass" && !ok) return false;
-      if (res === "fail" && ok) return false;
+      if (s.filter.res === "pass" && !ok) return false;
+      if (s.filter.res === "fail" && ok) return false;
       return true;
     }).slice(0, 200);
-    if (!shown.length) { list.appendChild(el("li", runs.length ? "No runs match these filters." : "No runs yet.", "empty")); return; }
+  }
+
+  function renderRuns(s) {
+    var list = document.getElementById("runs");
+    list.textContent = "";
+    var shown = filteredRuns(s);
+    if (!shown.length) {
+      var msg = s.feed ? (runsOf(s).length ? "No runs match these filters." : "No runs yet.") : "Waiting for the first sync.";
+      list.appendChild(el("li", msg, "empty"));
+      return;
+    }
     shown.forEach(function (r) {
       var li = document.createElement("li"), btn = document.createElement("button");
       btn.type = "button";
@@ -251,18 +328,15 @@ dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
       btn.appendChild(el("span", ok ? "pass" : "fail", "pill " + (ok ? "pass" : "fail")));
       btn.appendChild(el("span", r.run_id, "id"));
       btn.appendChild(el("span", fmt(r.input_tokens) + " in · " + fmt(r.cached_tokens || 0) + " cached", "meta"));
-      btn.addEventListener("click", function () { openRun(r); });
+      btn.addEventListener("click", function () { dispatch({ type: "OPEN_RUN", runId: r.run_id }); });
       li.appendChild(btn); list.appendChild(li);
     });
   }
 
-  function renderAll() { renderSummary(); renderCharts(); renderRuns(); }
-
   function msgBlock(role, label, text) {
     var box = el("div", null, "msg " + role);
     box.appendChild(el("div", label, "who"));
-    var pre = el("pre", null);
-    var full = text == null ? "" : String(text), limit = 600;
+    var pre = el("pre", null), full = text == null ? "" : String(text), limit = 600;
     pre.textContent = full.length > limit ? full.slice(0, limit) + "…" : full;
     box.appendChild(pre);
     if (full.length > limit) {
@@ -274,74 +348,77 @@ dialog::backdrop { background: color-mix(in srgb, #000 45%, transparent); }
     return box;
   }
 
-  function openRun(r) {
+  function renderModal(s) {
+    var dlg = document.getElementById("inspector");
+    var run = s.modal.runId ? runsOf(s).filter(function (r) { return r.run_id === s.modal.runId; })[0] : null;
+    if (!s.modal.open || !run) { if (dlg.open) dlg.close(); return; }
     var thread = document.getElementById("thread"), facts = document.getElementById("facts");
     thread.textContent = ""; facts.textContent = "";
-    document.getElementById("dlgId").textContent = r.run_id;
-    var ctx = context && context[r.conversation];
+    document.getElementById("dlgId").textContent = run.run_id;
+    var ctx = s.conversations && s.conversations[run.conversation];
     if (ctx) {
       var sys = document.createElement("details");
       sys.appendChild(el("summary", "System, notes and tools"));
       sys.appendChild(msgBlock("system", "system", ctx.system + "\n\nNotes:\n- " + (ctx.notes || []).join("\n- ")));
       thread.appendChild(sys);
       (ctx.history || []).forEach(function (m) { thread.appendChild(msgBlock(m.role === "assistant" ? "assistant" : "user", m.role, m.content)); });
-      thread.appendChild(msgBlock("user", "user · request", ctx.request + "\n\n" + Object.keys(ctx.files || {}).map(function (f) { return "File " + f + ":\n" + ctx.files[f]; }).join("\n")));
+      thread.appendChild(msgBlock("user", "user · request", ctx.request + "\n\n" +
+        Object.keys(ctx.files || {}).map(function (f) { return "File " + f + ":\n" + ctx.files[f]; }).join("\n")));
     } else {
-      thread.appendChild(el("p", contextLoading ? "Loading the conversation…" : "Conversation context is not in the store yet.", "note"));
-      loadContext();
+      var note = s.context === "failed" ? "The conversation context could not be read." :
+                 s.context === "ready" ? "This run's conversation is not in the store." : "Loading the conversation…";
+      thread.appendChild(el("p", note, "note"));
     }
-    thread.appendChild(msgBlock("assistant", "assistant · reply", r.reply == null ? "(no reply stored)" : r.reply + (r.reply_truncated ? "\n[reply truncated for storage]" : "")));
-    var rows = [
-      ["Condition", condLabel(r.condition)], ["Conversation", r.conversation], ["Date", r.ts],
-      ["Behavior", r.behavior_pass ? "pass" : "fail"], ["Decision", r.constraint_pass ? "pass" : "fail"],
-      ["Input tokens", fmt(r.input_tokens)], ["Cached tokens", fmt(r.cached_tokens || 0)], ["Output tokens", fmt(r.output_tokens)],
-      ["Model", r.model]
-    ];
-    rows.forEach(function (kv) { var d = document.createElement("div"); d.appendChild(el("dt", kv[0])); var dd = el("dd", kv[1]); d.appendChild(dd); facts.appendChild(d); });
-    if (!dlg.open) dlg.showModal();
-    document.getElementById("dlgClose").focus();
-  }
-
-  function loadContext() {
-    if (contextLoading || !db) return;
-    contextLoading = true;
-    db.doc("context/v2").get().then(function (snap) {
-      context = snap.exists ? (snap.data().conversations || {}) : {};
-      contextLoading = false;
-      renderAll();
-    }, function (e) {
-      contextLoading = false;
-      context = {};
-      setLive(false, "Context unavailable: " + (e && e.code ? e.code : "unknown"));
+    thread.appendChild(msgBlock("assistant", "assistant · reply",
+      run.reply == null ? "(no reply stored)" : run.reply + (run.reply_truncated ? "\n[reply truncated for storage]" : "")));
+    [["Condition", condLabel(run.condition)], ["Conversation", run.conversation], ["Date", run.ts],
+     ["Behavior", run.behavior_pass ? "pass" : "fail"], ["Decision", run.constraint_pass ? "pass" : "fail"],
+     ["Input tokens", fmt(run.input_tokens)], ["Cached tokens", fmt(run.cached_tokens || 0)],
+     ["Output tokens", fmt(run.output_tokens)], ["Model", run.model]].forEach(function (kv) {
+      var d = document.createElement("div"); d.appendChild(el("dt", kv[0])); d.appendChild(el("dd", kv[1])); facts.appendChild(d);
     });
+    if (!dlg.open) dlg.showModal();
   }
 
-  document.getElementById("condFilter").addEventListener("change", renderRuns);
-  document.getElementById("resFilter").addEventListener("change", renderRuns);
-  document.getElementById("dlgClose").addEventListener("click", function () { dlg.close(); });
-  dlg.addEventListener("click", function (e) { if (e.target === dlg) dlg.close(); });
+  function render(s, before) {
+    renderLive(s);
+    renderSummary(s);
+    renderCharts(s);
+    renderRuns(s);
+    renderModal(s);
+  }
+
+  /* ---- Wiring: user input becomes events. Nothing here renders. ---- */
+  document.getElementById("condFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { cond: e.target.value } }); });
+  document.getElementById("resFilter").addEventListener("change", function (e) { dispatch({ type: "FILTER", patch: { res: e.target.value } }); });
+  document.getElementById("dlgClose").addEventListener("click", function () { dispatch({ type: "CLOSE_RUN" }); });
+  var dlgEl = document.getElementById("inspector");
+  dlgEl.addEventListener("click", function (e) { if (e.target === dlgEl) dispatch({ type: "CLOSE_RUN" }); });
+  dlgEl.addEventListener("close", function () { if (state.modal.open) dispatch({ type: "CLOSE_RUN" }); });
+
+  /* Opening a run needs the conversation context, so request it when the modal opens. */
+  var _dispatch = dispatch;
+  dispatch = function (ev) {
+    _dispatch(ev);
+    if (ev.type === "OPEN_RUN" && state.context !== "ready") _dispatch({ type: "CONTEXT_REQUEST" });
+  };
 
   async function start() {
     var claude = window.claude;
     db = claude && claude.use ? await claude.use("db") : null;
-    if (!db) { setLive(false, "Live store unavailable in this view"); return; }
-    timer = setTimeout(function () { if (!gotData) connNote.hidden = false; }, 10000);
+    if (!db) { dispatch({ type: "UNAVAILABLE" }); return; }
+    var stale = setTimeout(function () { dispatch({ type: "STALE" }); }, STALE_MS);
     db.doc("feed/latest").onSnapshot(function (d) {
-      if (!d.metadata.fromCache) { gotData = true; clearTimeout(timer); connNote.hidden = true; }
-      if (!d.exists) { setLive(false, "Waiting for the first sync"); return; }
-      var doc = d.data();
-      runs = doc.runs || [];
-      setLive(true, "Live · " + (doc.run_count || runs.length) + " runs");
-      var cap = doc.cap_tokens || 0, spent = doc.spent_tokens || 0;
-      document.getElementById("budgetBar").style.width = (cap ? Math.min(100, 100 * spent / cap) : 0).toFixed(2) + "%";
-      document.getElementById("budgetText").textContent =
-        fmt(spent) + " of " + fmt(cap) + " tokens on the local ledger (not a provider quota)";
-      renderAll();
+      if (!d.metadata.fromCache) clearTimeout(stale);
+      if (!d.exists) return;
+      dispatch({ type: "FEED", fromCache: d.metadata.fromCache, feed: d.data() });
     }, function (e) {
-      clearTimeout(timer);
-      setLive(false, "Store error: " + (e && e.code ? e.code : "unknown"));
+      clearTimeout(stale);
+      dispatch({ type: "FEED_ERROR", code: e && e.code ? e.code : "unknown" });
     });
   }
+
+  render(state, null);
   start();
 })();
 </script>
