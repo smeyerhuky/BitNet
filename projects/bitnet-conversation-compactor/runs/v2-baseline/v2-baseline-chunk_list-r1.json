@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\ndef chunk_list(xs, n):\n    \"\"\"Split xs into consecutive chunks of size n; the last chunk may be shorter.\"\"\"\n    return tuple(tuple(xs[i : i + n]) for i in range(0, len(xs), n))\n```",
+  "usage": {
+    "prompt_tokens": 3249,
+    "completion_tokens": 67,
+    "total_tokens": 3316,
+    "prompt_tokens_details": {
+      "cached_tokens": 192
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": false,
+    "constraint_pass": true,
+    "detail": "AssertionError"
+  }
+}
