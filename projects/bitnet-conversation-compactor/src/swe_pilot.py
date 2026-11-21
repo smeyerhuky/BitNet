@@ -52,14 +52,27 @@ def file_at(commit, path):
                           capture_output=True, text=True, check=True).stdout
 
 
+def normalize(diff):
+    """Add a/ and b/ prefixes to bare ---/+++ paths so git apply can strip one level (-p1)."""
+    out = []
+    for line in diff.splitlines():
+        if line.startswith("--- ") and not line.startswith("--- a/") and not line.startswith("--- /dev/null"):
+            line = "--- a/" + line[4:].split("\t")[0].strip()
+        elif line.startswith("+++ ") and not line.startswith("+++ b/") and not line.startswith("+++ /dev/null"):
+            line = "+++ b/" + line[4:].split("\t")[0].strip()
+        out.append(line)
+    return "\n".join(out).strip() + "\n"
+
+
 def extract_diff(reply):
-    """Return the last diff in the reply: a fenced ```diff block, or raw text starting at a diff header."""
+    """Return the last diff in the reply: a fenced diff block, or raw text starting at a diff header.
+    Accepts git headers, --- a/ headers, and bare --- path headers (normalized to a/ and b/)."""
     blocks = re.findall(r"```(?:diff|patch)?[ \t]*\n(.*?)```", reply, re.S)
-    candidates = blocks[::-1] + [reply]
-    for body in candidates:
-        m = re.search(r"^(diff --git |--- a/)", body, re.M)
+    for body in blocks[::-1] + [reply]:
+        m = re.search(r"^(diff --git |--- )", body, re.M)
         if m:
-            return body[m.start():].strip() + "\n"
+            d = body[m.start():]
+            return normalize(d) if not d.startswith("diff --git") else d.strip() + "\n"
     return ""
 
 
