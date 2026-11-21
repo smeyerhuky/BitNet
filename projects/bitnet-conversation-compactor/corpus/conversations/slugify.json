@@ -1,0 +1,66 @@
+{
+  "id": "slugify",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: input made only of punctuation returns an empty string.\n# TODO: implement slugify(title)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement slugify(title) in utils.py. Convert a title to a URL slug: lowercase, runs of non-alphanumeric characters become a single hyphen, no leading or trailing hyphens. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert slugify(\"Hello, World!\") == \"hello-world\"\nassert slugify(\"  A -- B  \") == \"a-b\"\nassert slugify(\"\") == \"\"\n",
+    "constraint_tests": "assert slugify(\"!!!\") == \"\"\n",
+    "reference": "import re\n\ndef slugify(title):\n    return re.sub(r\"[^a-z0-9]+\", \"-\", title.lower()).strip(\"-\")\n"
+  }
+}

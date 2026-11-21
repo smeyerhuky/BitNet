@@ -1,0 +1,66 @@
+{
+  "id": "merge_intervals",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: touching intervals such as [1,2] and [2,3] must merge.\n# TODO: implement merge_intervals(intervals)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement merge_intervals(intervals) in utils.py. Given a list of [start, end] pairs, return the merged list sorted by start. Overlapping and touching intervals merge. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert merge_intervals([[1,3],[2,6],[8,10],[15,18]]) == [[1,6],[8,10],[15,18]]\nassert merge_intervals([[1,4],[4,5]]) == [[1,5]]\nassert merge_intervals([]) == []\n",
+    "constraint_tests": "assert merge_intervals([[1,2],[2,3]]) == [[1,3]]\n",
+    "reference": "def merge_intervals(intervals):\n    out = []\n    for a, b in sorted(intervals):\n        if out and a <= out[-1][1]:\n            out[-1][1] = max(out[-1][1], b)\n        else:\n            out.append([a, b])\n    return out\n"
+  }
+}

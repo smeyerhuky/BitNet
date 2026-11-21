@@ -1,0 +1,66 @@
+{
+  "id": "roman_to_int",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: subtractive pairs use the value of the smaller left symbol, as in IV = 4.\n# TODO: implement roman_to_int(s)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement roman_to_int(s) in utils.py. Convert a Roman numeral (I, V, X, L, C, D, M) to an integer, including subtractive pairs such as IV and CM. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert roman_to_int(\"III\") == 3\nassert roman_to_int(\"MCMXCIV\") == 1994\nassert roman_to_int(\"LVIII\") == 58\n",
+    "constraint_tests": "assert roman_to_int(\"IV\") == 4\n",
+    "reference": "def roman_to_int(s):\n    v = {\"I\":1,\"V\":5,\"X\":10,\"L\":50,\"C\":100,\"D\":500,\"M\":1000}\n    total = 0\n    for i, c in enumerate(s):\n        if i + 1 < len(s) and v[c] < v[s[i+1]]:\n            total -= v[c]\n        else:\n            total += v[c]\n    return total\n"
+  }
+}

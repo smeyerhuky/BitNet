@@ -1,0 +1,66 @@
+{
+  "id": "parse_duration",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: invalid input must raise ValueError, never return None.\n# TODO: implement parse_duration(s)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement parse_duration(s) in utils.py. Parse a duration like '1h30m15s' (any part optional, order h then m then s) and return total seconds. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert parse_duration(\"1h30m15s\") == 5415\nassert parse_duration(\"45s\") == 45\nassert parse_duration(\"2h\") == 7200\n",
+    "constraint_tests": "try:\n    parse_duration(\"abc\")\n    raise SystemExit(\"no error raised\")\nexcept ValueError:\n    pass\n",
+    "reference": "import re\n\ndef parse_duration(s):\n    m = re.fullmatch(r\"(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?\", s)\n    if not s or not m or not any(m.groups()):\n        raise ValueError(s)\n    h, mi, se = (int(g) if g else 0 for g in m.groups())\n    return h * 3600 + mi * 60 + se\n"
+  }
+}

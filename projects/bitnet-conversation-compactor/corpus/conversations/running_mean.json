@@ -1,0 +1,66 @@
+{
+  "id": "running_mean",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: results are always floats, even for integer input.\n# TODO: implement running_mean(xs)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement running_mean(xs) in utils.py. Return a list whose i-th element is the mean of xs[0..i] as a float. Empty input gives an empty list. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert running_mean([2,4,6]) == [2.0, 3.0, 4.0]\nassert running_mean([]) == []\n",
+    "constraint_tests": "assert running_mean([5]) == [5.0] and isinstance(running_mean([5])[0], float)\n",
+    "reference": "def running_mean(xs):\n    out = []\n    total = 0\n    for i, x in enumerate(xs, 1):\n        total += x\n        out.append(total / i)\n    return out\n"
+  }
+}

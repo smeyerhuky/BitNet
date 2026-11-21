@@ -1,0 +1,19 @@
+{
+  "reply": "```python\n\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: n must be positive; raise ValueError otherwise.\ndef chunk_list(xs, n):\n    \"\"\"Split list xs into consecutive chunks of size n.\"\"\"\n    if n <= 0:\n        raise ValueError(\"n must be positive\")\n    return [xs[i : i + n] for i in range(0, len(xs), n)]\n```",
+  "usage": {
+    "prompt_tokens": 376,
+    "completion_tokens": 89,
+    "total_tokens": 465,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "score": {
+    "behavior_pass": true,
+    "constraint_pass": true,
+    "detail": ""
+  }
+}

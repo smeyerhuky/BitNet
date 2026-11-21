@@ -1,0 +1,66 @@
+{
+  "id": "chunk_list",
+  "spec_version": "0.2",
+  "system": "You are a careful Python coding assistant working in the utils project. Follow the file's constraints. Reply with the complete updated module in one python code block.",
+  "tools": [
+    {
+      "name": "read_file",
+      "description": "Read a project file",
+      "parameters": {
+        "path": "string"
+      }
+    },
+    {
+      "name": "write_file",
+      "description": "Write a project file",
+      "parameters": {
+        "path": "string",
+        "content": "string"
+      }
+    },
+    {
+      "name": "run_tests",
+      "description": "Run the test suite",
+      "parameters": {}
+    }
+  ],
+  "notes": [
+    "Project: utils, a small pure-Python helper library.",
+    "Style: type hints optional; docstrings short.",
+    "CI runs on Python 3.11 and 3.13.",
+    "Owner prefers standard library only."
+  ],
+  "config": {
+    "temperature": 0.5,
+    "top_p": 1,
+    "max_tokens": 1024,
+    "seed": 0
+  },
+  "files": {
+    "utils.py": "\"\"\"Helper utilities.\"\"\"\n\n# CONSTRAINT: n must be positive; raise ValueError otherwise.\n# TODO: implement chunk_list(xs, n)\n"
+  },
+  "history": [
+    {
+      "role": "user",
+      "content": "Please add a one-line docstring to the module header of utils.py."
+    },
+    {
+      "role": "assistant",
+      "content": "Added: \"\"\"Helper utilities.\"\"\" at the top of utils.py."
+    },
+    {
+      "role": "user",
+      "content": "Thanks. Is there anything else pending in utils.py?"
+    },
+    {
+      "role": "assistant",
+      "content": "Only the function you asked about next. The file has one constraint comment per function."
+    }
+  ],
+  "request": "Implement chunk_list(xs, n) in utils.py. Split list xs into consecutive chunks of size n. The last chunk may be shorter. Return the full updated utils.py in one python code block.",
+  "check": {
+    "behavior_tests": "assert chunk_list([1,2,3,4,5], 2) == [[1,2],[3,4],[5]]\nassert chunk_list([], 3) == []\n",
+    "constraint_tests": "try:\n    chunk_list([1], 0)\n    raise SystemExit(\"no error raised\")\nexcept ValueError:\n    pass\n",
+    "reference": "def chunk_list(xs, n):\n    if n <= 0:\n        raise ValueError(\"n must be positive\")\n    return [xs[i:i + n] for i in range(0, len(xs), n)]\n"
+  }
+}
